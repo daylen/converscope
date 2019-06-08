@@ -2,8 +2,9 @@ import glob
 import chat_pb2
 import json
 
-FB_PATH = './data/facebook-daylenyang-json/messages'
-IMESSAGE_PATH = './data/imessage_chat.db'
+DATA_DIR = './data/'
+FB_PATH = DATA_DIR + '/facebook-daylenyang-json/messages'
+IMESSAGE_PATH = DATA_DIR + '/imessage_chat.db'
 
 def get_content_type(message_obj):
 	# Message is of Generic type but has special fields.
@@ -88,12 +89,16 @@ def read_fb_dir(fb_path):
 	return inbox
 
 def read_imessage(imessage_path):
+	# TODO implement
 	pass
 
 def main():
 	fb_inbox = read_fb_dir(FB_PATH)
-	print('Conversations in FB:', len(fb_inbox.conversation))
-	print(fb_inbox)
+	export_path = DATA_DIR + '/fb_inbox.pb'
+	f = open(export_path, 'wb')
+	f.write(fb_inbox.SerializeToString())
+	f.close()
+	print('Wrote', len(fb_inbox.conversation), 'conversations to', export_path)
 	imessage_inbox = read_imessage(IMESSAGE_PATH)
 
 if __name__ == '__main__':
