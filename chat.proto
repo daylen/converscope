@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+message Inbox {
+	// List of all conversations
+	repeated Conversation conversation = 1;
+}
+
+message Conversation {
+	// List of participants in this conversation
+	repeated string participant = 1;
+	// Facebook lets you name group chats
+	string group_name = 2;
+	// All messages in this conversation
+	repeated Message message = 3;
+}
+
+enum ContentType {
+	UNKNOWN = 0;
+	TEXT = 1;
+	PHOTO = 2;
+	VIDEO = 3;
+	FILE = 4;
+}
+
+message Message {
+	// Person who sent the message
+	string sender_name = 1;
+	// When the message was sent
+	int64 timestamp = 2;
+	// Content of the message. If not TEXT type, should be a path to a file on
+	// disk
+	string content = 3;
+	// Type of content
+	ContentType content_type = 4;
+}
