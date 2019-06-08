@@ -14,22 +14,26 @@ message Conversation {
 	repeated Message message = 3;
 }
 
-enum ContentType {
-	UNKNOWN = 0;
-	TEXT = 1;
-	PHOTO = 2;
-	VIDEO = 3;
-	FILE = 4;
-}
-
 message Message {
+	enum ContentType {
+		CT_UNKNOWN = 0;
+		CT_IGNORE = 1;
+		CT_TEXT = 2;
+		CT_PHOTO = 3;
+		CT_STICKER = 4;
+		CT_GIF = 5;
+		CT_FILE = 6;
+		CT_VIDEO = 7;
+		CT_AUDIO = 8;
+	}
 	// Person who sent the message
 	string sender_name = 1;
 	// When the message was sent
 	int64 timestamp = 2;
-	// Content of the message. If not TEXT type, should be a path to a file on
-	// disk
+	// Content of the message.
 	string content = 3;
 	// Type of content
-	ContentType content_type = 4;
+	Message.ContentType content_type = 4;
+	// Media URIs, for photos and gifs
+	repeated string media_uri = 5;
 }

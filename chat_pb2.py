@@ -3,7 +3,6 @@
 
 import sys
 _b=sys.version_info[0]<3 and (lambda x:x) or (lambda x:x.encode('latin1'))
-from google.protobuf.internal import enum_type_wrapper
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
@@ -20,50 +19,60 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='chat.proto',
   package='',
   syntax='proto3',
-  serialized_pb=_b('\n\nchat.proto\",\n\x05Inbox\x12#\n\x0c\x63onversation\x18\x01 \x03(\x0b\x32\r.Conversation\"R\n\x0c\x43onversation\x12\x13\n\x0bparticipant\x18\x01 \x03(\t\x12\x12\n\ngroup_name\x18\x02 \x01(\t\x12\x19\n\x07message\x18\x03 \x03(\x0b\x32\x08.Message\"f\n\x07Message\x12\x13\n\x0bsender_name\x18\x01 \x01(\t\x12\x11\n\ttimestamp\x18\x02 \x01(\x03\x12\x0f\n\x07\x63ontent\x18\x03 \x01(\t\x12\"\n\x0c\x63ontent_type\x18\x04 \x01(\x0e\x32\x0c.ContentType*D\n\x0b\x43ontentType\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x08\n\x04TEXT\x10\x01\x12\t\n\x05PHOTO\x10\x02\x12\t\n\x05VIDEO\x10\x03\x12\x08\n\x04\x46ILE\x10\x04\x62\x06proto3')
+  serialized_pb=_b('\n\nchat.proto\",\n\x05Inbox\x12#\n\x0c\x63onversation\x18\x01 \x03(\x0b\x32\r.Conversation\"R\n\x0c\x43onversation\x12\x13\n\x0bparticipant\x18\x01 \x03(\t\x12\x12\n\ngroup_name\x18\x02 \x01(\t\x12\x19\n\x07message\x18\x03 \x03(\x0b\x32\x08.Message\"\x90\x02\n\x07Message\x12\x13\n\x0bsender_name\x18\x01 \x01(\t\x12\x11\n\ttimestamp\x18\x02 \x01(\x03\x12\x0f\n\x07\x63ontent\x18\x03 \x01(\t\x12*\n\x0c\x63ontent_type\x18\x04 \x01(\x0e\x32\x14.Message.ContentType\x12\x11\n\tmedia_uri\x18\x05 \x03(\t\"\x8c\x01\n\x0b\x43ontentType\x12\x0e\n\nCT_UNKNOWN\x10\x00\x12\r\n\tCT_IGNORE\x10\x01\x12\x0b\n\x07\x43T_TEXT\x10\x02\x12\x0c\n\x08\x43T_PHOTO\x10\x03\x12\x0e\n\nCT_STICKER\x10\x04\x12\n\n\x06\x43T_GIF\x10\x05\x12\x0b\n\x07\x43T_FILE\x10\x06\x12\x0c\n\x08\x43T_VIDEO\x10\x07\x12\x0c\n\x08\x43T_AUDIO\x10\x08\x62\x06proto3')
 )
 
-_CONTENTTYPE = _descriptor.EnumDescriptor(
+
+
+_MESSAGE_CONTENTTYPE = _descriptor.EnumDescriptor(
   name='ContentType',
-  full_name='ContentType',
+  full_name='Message.ContentType',
   filename=None,
   file=DESCRIPTOR,
   values=[
     _descriptor.EnumValueDescriptor(
-      name='UNKNOWN', index=0, number=0,
+      name='CT_UNKNOWN', index=0, number=0,
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='TEXT', index=1, number=1,
+      name='CT_IGNORE', index=1, number=1,
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='PHOTO', index=2, number=2,
+      name='CT_TEXT', index=2, number=2,
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='VIDEO', index=3, number=3,
+      name='CT_PHOTO', index=3, number=3,
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='FILE', index=4, number=4,
+      name='CT_STICKER', index=4, number=4,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='CT_GIF', index=5, number=5,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='CT_FILE', index=6, number=6,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='CT_VIDEO', index=7, number=7,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='CT_AUDIO', index=8, number=8,
       options=None,
       type=None),
   ],
   containing_type=None,
   options=None,
-  serialized_start=248,
-  serialized_end=316,
+  serialized_start=277,
+  serialized_end=417,
 )
-_sym_db.RegisterEnumDescriptor(_CONTENTTYPE)
-
-ContentType = enum_type_wrapper.EnumTypeWrapper(_CONTENTTYPE)
-UNKNOWN = 0
-TEXT = 1
-PHOTO = 2
-VIDEO = 3
-FILE = 4
-
+_sym_db.RegisterEnumDescriptor(_MESSAGE_CONTENTTYPE)
 
 
 _INBOX = _descriptor.Descriptor(
@@ -177,11 +186,19 @@ _MESSAGE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='media_uri', full_name='Message.media_uri', index=4,
+      number=5, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
+    _MESSAGE_CONTENTTYPE,
   ],
   options=None,
   is_extendable=False,
@@ -189,17 +206,17 @@ _MESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=144,
-  serialized_end=246,
+  serialized_start=145,
+  serialized_end=417,
 )
 
 _INBOX.fields_by_name['conversation'].message_type = _CONVERSATION
 _CONVERSATION.fields_by_name['message'].message_type = _MESSAGE
-_MESSAGE.fields_by_name['content_type'].enum_type = _CONTENTTYPE
+_MESSAGE.fields_by_name['content_type'].enum_type = _MESSAGE_CONTENTTYPE
+_MESSAGE_CONTENTTYPE.containing_type = _MESSAGE
 DESCRIPTOR.message_types_by_name['Inbox'] = _INBOX
 DESCRIPTOR.message_types_by_name['Conversation'] = _CONVERSATION
 DESCRIPTOR.message_types_by_name['Message'] = _MESSAGE
-DESCRIPTOR.enum_types_by_name['ContentType'] = _CONTENTTYPE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 Inbox = _reflection.GeneratedProtocolMessageType('Inbox', (_message.Message,), dict(
