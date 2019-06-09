@@ -6,6 +6,8 @@ message Inbox {
 }
 
 message Conversation {
+	// Unique identifier for this conversation
+	int64 id = 4;
 	// List of participants in this conversation
 	repeated string participant = 1;
 	// Facebook lets you name group chats
