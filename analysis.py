@@ -55,6 +55,27 @@ class InboxAnalyzer:
 		self.id_conversation_map = {}
 		for c in inbox.conversation:
 			self.id_conversation_map[c.id] = c
+		print('InboxAnalyzer initialized,', len(self.id_conversation_map), 'conversations')
+
+	def get_conversations(self):
+		"""
+		Return all conversation metadata stripped of messages, and the metric response for the count metric.
+		"""
+		c_metadatas = []
+		for c in self.id_conversation_map.values():
+			c_metadata = chat_pb2.Conversation()
+			c_metadata.id = c.id
+			c_metadata.participant.extend(c.participant)
+			c_metadata.group_name = c.group_name
+			c_metadatas.append(c_metadata)
+		req = MetricRequest()
+		req.metric = MN_MESSAGE_COUNT
+		resp = self.handle_metric_request(req)
+		m_resp = sort_metrics(combine_metrics(resp.int_metric, 'sender_name'))
+		return c_metadatas, m_resp
+
+	def get_conversation(self, c_id):
+		return self.id_conversation_map[c_id]
 
 	def handle_metric_request(self, req):
 		"""
@@ -121,13 +142,18 @@ def main():
 	ia = InboxAnalyzer(inbox)
 	req = MetricRequest()
 	req.metric = MN_MESSAGE_COUNT
-	req.filter.max_participants = 2
+	# req.filter.max_participants = 2
 
 	print('MetricRequest:', req)
 	resp = ia.handle_metric_request(req)
 	# print(list(filter_zeros(resp.int_metric)))
 	# print('===')
-	print(sort_metrics(combine_metrics(resp.int_metric, 'conversation_id')))
+	result = sort_metrics(combine_metrics(resp.int_metric, 'sender_name'))
+	print(result)
+	for im in result:
+		c = ia.get_conversation(im.filter.conversation_id)
+		print('[', im, c.group_name, c.participant, ']')
+	# print(sort_metrics(resp.int_metric))
 
 if __name__ == '__main__':
 	main()
