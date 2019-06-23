@@ -1,0 +1,16 @@
+.participants {
+	padding: 0;
+}
+.participants li {
+	display: inline;
+}
+.participants li:after {
+	content: ", ";
+}
+.participants li:last-of-type:after {
+	content: "";
+}
+.card:hover {
+	background-color: #eee;
+	cursor: pointer;
+}
