@@ -59,7 +59,10 @@ class InboxAnalyzer:
 
 	def get_conversations(self):
 		"""
-		Return all conversation metadata stripped of messages, and the metric response for the count metric.
+		Return all conversation metadata stripped of messages, and the metric
+		response for the count metric.
+
+		Returns: [Conversation], [IntegerMetric]
 		"""
 		c_metadatas = []
 		for c in self.id_conversation_map.values():
@@ -71,6 +74,7 @@ class InboxAnalyzer:
 		req = MetricRequest()
 		req.metric = MN_MESSAGE_COUNT
 		resp = self.handle_metric_request(req)
+		# Eliminate sender_name to get total message count in thread
 		m_resp = sort_metrics(combine_metrics(resp.int_metric, 'sender_name'))
 		return c_metadatas, m_resp
 

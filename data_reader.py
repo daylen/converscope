@@ -34,8 +34,9 @@ def read_fb_conversation(path):
 	conversation = chat_pb2.Conversation()
 	with open(path) as f:
 		data = json.load(f)
+		# data = data
 		# print(data)
-		conversation.group_name = data['title']
+		conversation.group_name = data['title'].encode('latin1').decode('utf8')
 		for participant_obj in data['participants']:
 			conversation.participant.extend([participant_obj['name']])
 		KNOWN_FIELDS = set(['sender_name', 'timestamp_ms', 'content', 'type'])
