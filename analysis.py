@@ -159,5 +159,62 @@ def main():
 		print('[', im, c.group_name, c.participant, ']')
 	# print(sort_metrics(resp.int_metric))
 
+def word_find(word):
+	f = open(EXPORT_PATH, 'rb')
+	inbox = chat_pb2.Inbox()
+	inbox.ParseFromString(f.read())
+	f.close()
+
+	ia = InboxAnalyzer(inbox)
+	req = MetricRequest()
+	req.metric = MN_MESSAGE_COUNT
+	req.filter.sender_name = 'Daylen Yang'
+	# req.filter.max_participants = 2
+
+	print('MetricRequest:', req)
+	resp = ia.handle_metric_request(req)
+	# print(list(filter_zeros(resp.int_metric)))
+	# print('===')
+	result = sort_metrics(combine_metrics(resp.int_metric, 'sender_name'))
+	print(result)
+	for im in result:
+		c = ia.get_conversation(im.filter.conversation_id)
+		for msg in c.message:
+			if msg.content_type == chat_pb2.Message.CT_TEXT and word in msg.content.lower() and msg.sender_name == 'Daylen Yang':
+				print('[', im, c.group_name, c.participant, ']')
+				print(msg)
+	# print(sort_metrics(resp.int_metric))
+
+def conv_to_string(conv):
+	ordered = sorted(conv.message, key=lambda x: x.timestamp)
+	text_only = filter(lambda x: x.content_type == chat_pb2.Message.CT_TEXT, ordered)
+	transcript = ''
+	for message in text_only:
+		transcript += str.upper(message.sender_name) + ': ' + message.content + '\n\n'
+	return transcript
+
+
+def dump_for_gpt2():
+	"""
+	Dump everything to a text file for finetuning GPT-2.
+	"""
+	f = open(EXPORT_PATH, 'rb')
+	inbox = chat_pb2.Inbox()
+	inbox.ParseFromString(f.read())
+	f.close()
+
+	ia = InboxAnalyzer(inbox)
+	everything = ''
+	for c_metadata in ia.get_conversations()[0]:
+		conv = ia.get_conversation(c_metadata.id)
+		transcript = conv_to_string(conv)
+		everything += '<|startoftext|>\n'
+		everything += transcript + '\n'
+		everything += '<|endoftext|>\n'
+	with open('./gpt2_train_daylenyang.txt', 'w') as f:
+		f.write(everything)
+	
+
 if __name__ == '__main__':
-	main()
+	# word_find('apple')
+	dump_for_gpt2()
