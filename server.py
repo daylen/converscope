@@ -21,7 +21,7 @@ def zip_metrics_for_conversations(conversations, metrics):
 	zipped = []
 	for c in conversations:
 		cdict = MessageToDict(c)
-		cdict['count'] = cid_count_dict[c.id]
+		cdict['count'] = cid_count_dict[c.id] if c.id in cid_count_dict else -1
 		zipped.append(cdict)
 	return list(reversed(sorted(zipped, key=lambda x: x['count'])))
 

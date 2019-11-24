@@ -3,8 +3,26 @@ import chat_pb2
 import json
 import sqlite3
 from constants import *
+import pandas as pd
+import phonenumbers
 
-def read_imessage(path):
+def get_id_name_map(df):
+    id_df = df[list(filter(lambda x: 'Phone' in x or 'Email' in x, df.columns))]
+    id_name_map = {}
+    for idx, row in id_df.iterrows():
+        for cell in row:
+            if pd.isnull(cell):
+                continue
+            identifier = cell
+            try:
+                phone = phonenumbers.parse(cell, 'US')
+                identifier = phonenumbers.format_number(phone, phonenumbers.PhoneNumberFormat.E164)
+            except:
+                pass
+            id_name_map[identifier] = str(df.loc[idx]['First Name']) + ' ' + str(df.loc[idx]['Last Name'])
+    return id_name_map
+
+def read_imessage(path, id_name_map):
 	# useful resource: https://github.com/dsouzarc/iMessageAnalyzer/blob/master/Random%20SQLite%20Commands.txt
 	conn = sqlite3.connect(path)
 	c = conn.cursor()
@@ -15,31 +33,41 @@ def read_imessage(path):
 	for chat_id in chat_ids:
 		# print('CHAT ID', chat_id)
 		conversation = chat_pb2.Conversation()
-		# TODO fill in name, participants
 		conversation.group_name = str(chat_id[0])
+		conversation.id = chat_id[0]
 		messages = c2.execute("SELECT text, handleT.id, date, is_from_me FROM message messageT INNER JOIN chat_message_join chatMessageT ON (chatMessageT.chat_id=" + str(chat_id[0]) + ") AND messageT.ROWID=chatMessageT.message_id INNER JOIN handle handleT ON handleT.ROWID = messageT.handle_id ORDER BY messageT.date")
+		participants = set()
 		for msg in messages:
 			if msg[0] is None:
 				print('skipping empty message', msg)
 				continue
 			message_proto = conversation.message.add()
-			message_proto.sender_name = msg[1]
+			sender_name = msg[1]
+			if msg[1] in id_name_map:
+				sender_name = id_name_map[msg[1]]
+			if msg[3]:
+				sender_name = SELF_NAME
+			message_proto.sender_name = sender_name
 			message_proto.timestamp = msg[2]
 			message_proto.content_type = chat_pb2.Message.CT_TEXT
 			message_proto.content = msg[0]
+			participants.add(sender_name)
+		for participant in participants:
+			conversation.participant.extend([participant])
 		inbox.conversation.extend([conversation])
 	conn.close()
 	return inbox
 
 def main():
-	inbox = read_imessage(IMESSAGE_IMPORT_PATH)
+	id_name_map = get_id_name_map(pd.read_csv(CONTACTS_PATH))
+	inbox = read_imessage(IMESSAGE_IMPORT_PATH, id_name_map)
 	# assign_conversation_ids(inbox)
 
-	print(inbox)
-	# f = open(EXPORT_PATH2, 'wb')
-	# f.write(inbox.SerializeToString())
-	# f.close()
-	# print('Wrote', len(inbox.conversation), 'conversations to', EXPORT_PATH2)
+	# print(inbox)
+	f = open(EXPORT_PATH2, 'wb')
+	f.write(inbox.SerializeToString())
+	f.close()
+	print('Wrote', len(inbox.conversation), 'conversations to', EXPORT_PATH2)
 
 if __name__ == '__main__':
 	main()

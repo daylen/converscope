@@ -7,7 +7,7 @@ function ConversationPill(props) {
       <div className="card-body">
         <h5 className="">{props.group_name}</h5>
         <div className="">{props.message_count} messages</div>
-        <div className="text-muted small"><ul className="participants">{props.participants.map((name) => <li>{name}</li>)}</ul></div>
+        <div className="text-muted small"><ul className="participants">{props.participants ? props.participants.map((name) => <li>{name}</li>) : "No participants"}</ul></div>
       </div>
     </div>
   );
