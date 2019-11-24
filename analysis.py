@@ -2,6 +2,7 @@ from constants import *
 import chat_pb2
 from metric_pb2 import *
 from collections import Counter
+import random
 
 def count_messages(c_view, f):
 	"""
@@ -193,6 +194,10 @@ def conv_to_string(conv):
 		transcript += str.upper(message.sender_name) + ': ' + message.content + '\n\n'
 	return transcript
 
+def conv_count(conv):
+	ordered = sorted(conv.message, key=lambda x: x.timestamp)
+	text_only = filter(lambda x: x.content_type == chat_pb2.Message.CT_TEXT, ordered)
+	return len(list(text_only))
 
 def dump_for_gpt2():
 	"""
@@ -203,18 +208,33 @@ def dump_for_gpt2():
 	inbox.ParseFromString(f.read())
 	f.close()
 
+	random.seed(42)
+	TRAIN_PERCENT = 0.85
+
 	ia = InboxAnalyzer(inbox)
-	everything = ''
+	train_txt = ''
+	test_txt = ''
+	train_count, test_count = 0, 0
 	for c_metadata in ia.get_conversations()[0]:
 		conv = ia.get_conversation(c_metadata.id)
+		count = conv_count(conv)
 		transcript = conv_to_string(conv)
-		everything += '<|startoftext|>\n'
-		everything += transcript + '\n'
-		everything += '<|endoftext|>\n'
+		if random.random() < TRAIN_PERCENT:
+			train_txt += '<|startoftext|>\n'
+			train_txt += transcript + '\n'
+			train_txt += '<|endoftext|>\n'
+			train_count += count
+		else:
+			test_txt += '<|startoftext|>\n'
+			test_txt += transcript + '\n'
+			test_txt += '<|endoftext|>\n'
+			test_count += count
 	with open('./gpt2_train_daylenyang.txt', 'w') as f:
-		f.write(everything)
-	
+		f.write(train_txt)
+	with open('./gpt2_test_daylenyang.txt', 'w') as f:
+		f.write(test_txt)
+	print(train_count, test_count, 'messages')
+
 
 if __name__ == '__main__':
-	# word_find('apple')
 	dump_for_gpt2()
