@@ -86,15 +86,6 @@ def read_fb_dir(fb_path):
 			inbox.conversation.extend([conversation])
 	return inbox
 
-def read_imessage(imessage_path):
-	# TODO implement
-	inbox = chat_pb2.Inbox()
-	return inbox
-
-def combine_inboxes(a, b):
-	# TODO implement
-	return a
-
 def assign_conversation_ids(inbox):
 	i = 1
 	for c in inbox.conversation:
@@ -102,9 +93,7 @@ def assign_conversation_ids(inbox):
 		i += 1
 
 def main():
-	fb_inbox = read_fb_dir(FB_IMPORT_PATH)
-	imessage_inbox = read_imessage(IMESSAGE_IMPORT_PATH)
-	inbox = combine_inboxes(fb_inbox, imessage_inbox)
+	inbox = read_fb_dir(FB_IMPORT_PATH)
 	assign_conversation_ids(inbox)
 
 	print(inbox)
