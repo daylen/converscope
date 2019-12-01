@@ -2,6 +2,7 @@ import glob
 import chat_pb2
 import json
 from constants import *
+import google.protobuf.text_format as text_format
 
 def get_content_type(message_obj):
 	# Message is of Generic type but has special fields.
@@ -43,7 +44,7 @@ def read_fb_conversation(path):
 		for message_obj in data['messages']:
 			message_proto = conversation.message.add()
 			message_proto.sender_name = message_obj['sender_name']
-			message_proto.timestamp = message_obj['timestamp_ms']
+			message_proto.timestamp = message_obj['timestamp_ms'] // 1000
 			message_proto.content_type = get_content_type(message_obj)
 			if message_proto.content_type == chat_pb2.Message.CT_TEXT:
 				if 'content' not in message_obj:
@@ -69,7 +70,13 @@ def read_fb_conversation(path):
 				print('Unprocessed:', chat_pb2.Message.ContentType.Name(message_proto.content_type), message_obj)
 	return conversation
 
-def read_fb_dir(fb_path):
+def assign_conversation_ids(inbox):
+	i = 1
+	for c in inbox.conversation:
+		c.id = i
+		i += 1
+
+def read_facebook(fb_path):
 	"""
 	Read a Facebook /messages/ folder. That folder should contain an
 	archived_threads folder and an inbox folder. Returns an Inbox proto.
@@ -84,23 +91,21 @@ def read_fb_dir(fb_path):
 		for path in conversation_paths:
 			conversation = read_fb_conversation(path)
 			inbox.conversation.extend([conversation])
+	assign_conversation_ids(inbox)
 	return inbox
 
-def assign_conversation_ids(inbox):
-	i = 1
-	for c in inbox.conversation:
-		c.id = i
-		i += 1
-
 def main():
-	inbox = read_fb_dir(FB_IMPORT_PATH)
-	assign_conversation_ids(inbox)
+	inbox = read_facebook(FB_IMPORT_PATH)
 
 	print(inbox)
-	f = open(EXPORT_PATH, 'wb')
-	f.write(inbox.SerializeToString())
+	if USE_PBTXT:
+		f = open(EXPORT_PATH_FB + '.pbtxt', 'w')
+		f.write(str(text_format.MessageToString(inbox)))
+	else:
+		f = open(EXPORT_PATH_FB + '.pb', 'wb')
+		f.write(inbox.SerializeToString())
 	f.close()
-	print('Wrote', len(inbox.conversation), 'conversations to', EXPORT_PATH)
+	print('Wrote', len(inbox.conversation), 'conversations to', EXPORT_PATH_FB)
 
 if __name__ == '__main__':
 	main()

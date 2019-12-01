@@ -30,7 +30,7 @@ message Message {
 	}
 	// Person who sent the message
 	string sender_name = 1;
-	// When the message was sent
+	// When the message was sent, in unix time.
 	int64 timestamp = 2;
 	// Content of the message.
 	string content = 3;

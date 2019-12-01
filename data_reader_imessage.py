@@ -5,6 +5,8 @@ import sqlite3
 from constants import *
 import pandas as pd
 import phonenumbers
+import google.protobuf.text_format as text_format
+import datetime
 
 def get_id_name_map(df):
     id_df = df[list(filter(lambda x: 'Phone' in x or 'Email' in x, df.columns))]
@@ -22,7 +24,10 @@ def get_id_name_map(df):
             id_name_map[identifier] = str(df.loc[idx]['First Name']) + ' ' + str(df.loc[idx]['Last Name'])
     return id_name_map
 
-def read_imessage(path, id_name_map):
+def read_imessage(path):
+	# Load contacts
+	id_name_map = get_id_name_map(pd.read_csv(CONTACTS_PATH))
+
 	# useful resource: https://github.com/dsouzarc/iMessageAnalyzer/blob/master/Random%20SQLite%20Commands.txt
 	conn = sqlite3.connect(path)
 	c = conn.cursor()
@@ -35,7 +40,7 @@ def read_imessage(path, id_name_map):
 		conversation = chat_pb2.Conversation()
 		conversation.group_name = str(chat_id[0])
 		conversation.id = chat_id[0]
-		messages = c2.execute("SELECT text, handleT.id, date, is_from_me FROM message messageT INNER JOIN chat_message_join chatMessageT ON (chatMessageT.chat_id=" + str(chat_id[0]) + ") AND messageT.ROWID=chatMessageT.message_id INNER JOIN handle handleT ON handleT.ROWID = messageT.handle_id ORDER BY messageT.date")
+		messages = c2.execute("SELECT text, handleT.id, messageT.date/1000000000 + strftime(\"%s\", \"2001-01-01\") as date_unix, is_from_me FROM message messageT INNER JOIN chat_message_join chatMessageT ON (chatMessageT.chat_id=" + str(chat_id[0]) + ") AND messageT.ROWID=chatMessageT.message_id LEFT JOIN handle handleT ON handleT.ROWID = messageT.handle_id ORDER BY messageT.date")
 		participants = set()
 		for msg in messages:
 			if msg[0] is None:
@@ -46,6 +51,9 @@ def read_imessage(path, id_name_map):
 			if msg[1] in id_name_map:
 				sender_name = id_name_map[msg[1]]
 			if msg[3]:
+				sender_name = SELF_NAME
+			# It look like lack of handle ID means self
+			if msg[1] is None:
 				sender_name = SELF_NAME
 			message_proto.sender_name = sender_name
 			message_proto.timestamp = msg[2]
@@ -59,15 +67,17 @@ def read_imessage(path, id_name_map):
 	return inbox
 
 def main():
-	id_name_map = get_id_name_map(pd.read_csv(CONTACTS_PATH))
-	inbox = read_imessage(IMESSAGE_IMPORT_PATH, id_name_map)
-	# assign_conversation_ids(inbox)
+	inbox = read_imessage(IMESSAGE_IMPORT_PATH)
 
-	# print(inbox)
-	f = open(EXPORT_PATH2, 'wb')
-	f.write(inbox.SerializeToString())
+	print(inbox)
+	if USE_PBTXT:
+		f = open(EXPORT_PATH_IMESSAGE + '.pbtxt', 'w')
+		f.write(str(text_format.MessageToString(inbox)))
+	else:
+		f = open(EXPORT_PATH_IMESSAGE + '.pb', 'wb')
+		f.write(inbox.SerializeToString())
 	f.close()
-	print('Wrote', len(inbox.conversation), 'conversations to', EXPORT_PATH2)
+	print('Wrote', len(inbox.conversation), 'conversations to', EXPORT_PATH_IMESSAGE)
 
 if __name__ == '__main__':
 	main()

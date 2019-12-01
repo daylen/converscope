@@ -38,7 +38,7 @@ def conversations():
 
 def init():
 	global ia
-	f = open(EXPORT_PATH, 'rb')
+	f = open(EXPORT_PATH + ('.pbtxt' if USE_PBTXT else '.pb'), 'rb')
 	inbox = chat_pb2.Inbox()
 	inbox.ParseFromString(f.read())
 	f.close()
