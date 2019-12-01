@@ -10,6 +10,9 @@
 .participants li:last-of-type:after {
 	content: "";
 }
+.chart {
+	height: 200px;
+}
 .card {
 	transition: 0.15s;
 }

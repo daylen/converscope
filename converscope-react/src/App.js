@@ -6,31 +6,42 @@ function ConversationPill(props) {
   return (
     <div className="card mb-3">
       <div className="card-body">
-        <h5 className="">{props.group_name}</h5>
-        <div className="">{props.message_count} messages</div>
-        <div className="text-muted small"><ul className="participants">{props.participants.length > 2 ? props.participants.map((name) => <li key={props.c_id + name}>{name}</li>) : ""}</ul></div>
-        <Line data={{
-          labels: props.x_axis,
-          datasets: [{      label: '',
-      fill: false,
-      lineTension: 0.1,
-      backgroundColor: 'rgba(75,192,192,0.4)',
-      borderColor: 'rgba(75,192,192,1)',
-      borderCapStyle: 'butt',
-      borderDash: [],
-      borderDashOffset: 0.0,
-      borderJoinStyle: 'miter',
-      pointBorderColor: 'rgba(75,192,192,1)',
-      pointBackgroundColor: '#fff',
-      pointBorderWidth: 1,
-      pointHoverRadius: 5,
-      pointHoverBackgroundColor: 'rgba(75,192,192,1)',
-      pointHoverBorderColor: 'rgba(220,220,220,1)',
-      pointHoverBorderWidth: 2,
-      pointRadius: 1,
-      pointHitRadius: 10,
-data: props.count_by_day}]
-        }} />
+        <h5 className="">{props.group_name} <small className="text-muted">{props.message_count} messages</small></h5>
+        <div className="text-muted small">
+          <ul className="participants">{props.participants.length > 2 ? props.participants.map((name) => <li key={props.c_id + name}>{name}</li>) : ""}</ul>
+        </div>
+        <div className="chart">
+          <Line data={{
+            labels: props.x_axis,
+            datasets: [{
+              label: 'num messages',
+              fill: false,
+              lineTension: 0.1,
+              borderColor: 'rgba(75,192,192,0.5)',
+              borderWidth: 2,
+              pointBorderColor: 'rgba(75,192,192,1)',
+              pointHoverRadius: 5,
+              pointHoverBackgroundColor: 'rgba(75,192,192,1)',
+              pointHoverBorderWidth: 2,
+              pointRadius: 1,
+              pointHitRadius: 10,
+              data: props.count_by_day
+            }]
+          }} height={"100%"} options={{
+            maintainAspectRatio: false,
+            legend: {
+              display: false,
+            },
+            scales: {
+              xAxes: [{
+                type: 'time',
+                time: {
+                  unit: 'year',
+                }
+              }]
+            }
+          }} />
+        </div>
 
       </div>
     </div>
@@ -102,7 +113,6 @@ function App() {
           <div className="hero mt-3 mb-3 text-center">
             <h1 className="display-4 font-weight-light">converscope</h1>
             <p className="lead font-italic">daylen's texts, 2010-2019</p>
-            {/*<p className="lead font-italic">metadata reveals a lot</p>*/}
           </div>
         </div>
       </div>

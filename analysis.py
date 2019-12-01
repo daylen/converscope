@@ -48,7 +48,8 @@ class InboxAnalyzer:
 		c = self.id_conversation_map[c_id]
 		if len(c.message) == 0:
 			return sys.maxsize
-		return min(map(lambda x: x.timestamp, c.message))
+		# TODO hack: there appear to be some corrupted timestamps from ~2003. Filter to be >2007.
+		return min(filter(lambda x: x > 1167638400, map(lambda x: x.timestamp, c.message)))
 
 	def get_count_timeline(self, c_id, start_ts=-1):
 		"""
@@ -72,9 +73,9 @@ def main():
 	inbox.ParseFromString(f.read())
 	f.close()
 	ia = InboxAnalyzer(inbox)
-	hist = ia.get_count_timeline(955)
-	np.set_printoptions(threshold=sys.maxsize)
-	print(hist)
+	# hist = ia.get_count_timeline(955)
+	# np.set_printoptions(threshold=sys.maxsize)
+	print(ia.oldest_ts)
 
 if __name__ == '__main__':
 	main()

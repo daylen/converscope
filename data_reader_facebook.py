@@ -87,7 +87,7 @@ def read_facebook(fb_path):
 	for folder in folders:
 		full_path = fb_path + '/' + folder
 		print('Reading ' + full_path)
-		conversation_paths = glob.glob(full_path + '/*/message_1.json')
+		conversation_paths = glob.glob(full_path + '/*/message*.json')
 		for path in conversation_paths:
 			conversation = read_fb_conversation(path)
 			inbox.conversation.extend([conversation])
