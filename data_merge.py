@@ -18,6 +18,7 @@ def combine_inboxes(inbox_arr):
 				parts_to_convs[key] = conv
 	for conv in parts_to_convs.values():
 		combined.conversation.add().CopyFrom(conv)
+		# assert conv.group_name != SELF_NAME, conv.participant
 	print(parts_to_convs.keys())
 	assign_conversation_ids(combined)
 	return combined

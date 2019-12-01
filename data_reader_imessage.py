@@ -62,9 +62,9 @@ def read_imessage(path):
 			participants.add(sender_name)
 		conversation.participant.extend(list(participants))
 		# Overwrite group name with other party if this is a DM
-		if len(participants) == 2:
-			conversation.group_name = (conversation.participant[0] if conversation.participant[0] is not SELF_NAME else conversation.participant[1])
-			assert conversation.group_name is not SELF_NAME
+		if len(conversation.participant) == 2:
+			conversation.group_name = (conversation.participant[0] if conversation.participant[0] != SELF_NAME else conversation.participant[1])
+			assert conversation.group_name != SELF_NAME, conversation.participant
 		inbox.conversation.extend([conversation])
 	conn.close()
 	return inbox
