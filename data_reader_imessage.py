@@ -38,7 +38,7 @@ def read_imessage(path):
 	for chat_id in chat_ids:
 		# print('CHAT ID', chat_id)
 		conversation = chat_pb2.Conversation()
-		conversation.group_name = str(chat_id[0])
+		conversation.group_name = 'iMessage Chat ID ' + str(chat_id[0])
 		conversation.id = chat_id[0]
 		messages = c2.execute("SELECT text, handleT.id, messageT.date/1000000000 + strftime(\"%s\", \"2001-01-01\") as date_unix, is_from_me FROM message messageT INNER JOIN chat_message_join chatMessageT ON (chatMessageT.chat_id=" + str(chat_id[0]) + ") AND messageT.ROWID=chatMessageT.message_id LEFT JOIN handle handleT ON handleT.ROWID = messageT.handle_id ORDER BY messageT.date")
 		participants = set()
@@ -60,8 +60,11 @@ def read_imessage(path):
 			message_proto.content_type = chat_pb2.Message.CT_TEXT
 			message_proto.content = msg[0]
 			participants.add(sender_name)
-		for participant in participants:
-			conversation.participant.extend([participant])
+		conversation.participant.extend(list(participants))
+		# Overwrite group name with other party if this is a DM
+		if len(participants) == 2:
+			conversation.group_name = (conversation.participant[0] if conversation.participant[0] is not SELF_NAME else conversation.participant[1])
+			assert conversation.group_name is not SELF_NAME
 		inbox.conversation.extend([conversation])
 	conn.close()
 	return inbox

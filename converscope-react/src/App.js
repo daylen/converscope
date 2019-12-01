@@ -70,17 +70,23 @@ class ConversationList extends React.Component {
 function App() {
   return (
     <div>
-    <nav class="navbar navbar-dark bg-dark mb-3">
-    <div className="container">
-      <span class="navbar-brand mb-0 h1">Converscope</span>
-      </div>
-    </nav>
     <div className="container">
       <div className="row">
-        <div className="col-3">
-        Filters would go here
+        <div className="col-12">
+          <div className="hero mt-3 mb-3 text-center">
+            <h1 className="display-4 font-weight-light">converscope</h1>
+            <p class="lead font-italic">daylen's texts, 2009-2019</p>
+          </div>
         </div>
-        <div className="col-9">
+      </div>
+      <div className="row">
+        <div className="col-12">
+        <div class="btn-toolbar mb-3">
+          <div class="btn-group">
+            <button type="button" class="btn btn-primary active">DMs</button>
+            <button type="button" class="btn btn-primary">Groups</button>
+          </div>
+        </div>
         <ConversationList />
         </div>
       </div>

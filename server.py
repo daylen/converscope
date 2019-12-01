@@ -10,18 +10,14 @@ ia = None
 app = Flask(__name__)
 CORS(app)
 
-def zip_metrics_for_conversations(conversations, metrics):
+def zip_metrics_for_conversations(conversations, id_count_map):
 	"""
-	Add the metric to the conversations json. Assumes that the filter is just
-	conversation_id.
+	Add the metric to the conversations json.
 	"""
-	cid_count_dict = {}
-	for int_metric in metrics:
-		cid_count_dict[int_metric.filter.conversation_id] = int_metric.value
 	zipped = []
 	for c in conversations:
 		cdict = MessageToDict(c)
-		cdict['count'] = cid_count_dict[c.id] if c.id in cid_count_dict else -1
+		cdict['count'] = id_count_map[c.id] if c.id in id_count_map else -1
 		zipped.append(cdict)
 	return list(reversed(sorted(zipped, key=lambda x: x['count'])))
 
@@ -31,9 +27,10 @@ def main():
 
 @app.route('/api/conversations')
 def conversations():
-	c_metadatas, m_resp = ia.get_conversations()
+	c_metadatas = ia.get_conversations()
+	id_count_map = ia.get_message_counts()
 	return flask.jsonify({
-		'conversations': zip_metrics_for_conversations(c_metadatas, m_resp)
+		'conversations': zip_metrics_for_conversations(c_metadatas, id_count_map)
 		})
 
 def init():

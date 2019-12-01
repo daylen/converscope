@@ -10,7 +10,16 @@
 .participants li:last-of-type:after {
 	content: "";
 }
+.card {
+	transition: 0.15s;
+}
 .card:hover {
-	background-color: #eee;
+	box-shadow: 0 25px 60px 0 #ccc;
 	cursor: pointer;
+	transform: scale(1.02);
+}
+.card:active {
+	background: #f7f7f7;
+	transform: scale(0.99);
+	transition: 0s;
 }
