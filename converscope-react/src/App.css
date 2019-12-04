@@ -13,7 +13,7 @@
 .chart {
 	height: 200px;
 }
-.card {
+/*.card {
 	transition: 0.15s;
 }
 .card:hover {
@@ -23,6 +23,6 @@
 }
 .card:active {
 	background: #f7f7f7;
-	transform: scale(0.99);
+	transform: scale(1.01);
 	transition: 0s;
-}
+}*/

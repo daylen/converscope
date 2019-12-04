@@ -27,6 +27,11 @@ def main():
 	inbox_fb = read_facebook(FB_IMPORT_PATH)
 	inbox_imessage = read_imessage(IMESSAGE_IMPORT_PATH)
 	inbox = combine_inboxes([inbox_fb, inbox_imessage])
+	if STRIP_PII:
+		for c in inbox.conversation:
+			for m in c.message:
+				m.content = ""
+				del m.media_uri[:]
 
 	# print(inbox)
 	if USE_PBTXT:

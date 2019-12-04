@@ -2,6 +2,9 @@ DATA_DIR = './data/'
 
 USE_PBTXT = False
 
+# If true, does not store messages in the inbox file, and redacts names in the web app
+STRIP_PII = True
+
 # Data import/export
 
 FB_IMPORT_PATH = DATA_DIR + '/facebook-daylenyang-json/messages'

@@ -4,27 +4,45 @@ import chat_pb2
 import flask
 from flask_cors import CORS
 from flask import Flask
+from flask import request
 from google.protobuf.json_format import MessageToDict
 import datetime
+import json
+import sys
 
 ia = None
 app = Flask(__name__)
 CORS(app)
 
-def zip_metrics_for_conversations(conversations, id_count_map, ia):
+def zip_metrics_for_conversations(conversations, id_count_map, ia, filter_to_groups):
 	"""
 	Add the metric to the conversations json.
 	"""
 	num_days = 0
 	zipped = []
 	for c in conversations:
+		if not filter_to_groups and len(c.participant) > 2:
+			continue
+		if filter_to_groups and len(c.participant) <= 2:
+			continue
 		cdict = MessageToDict(c)
 		cdict['count'] = id_count_map[c.id] if c.id in id_count_map else -1
+		if STRIP_PII:
+			cdict['participant'] = []
+			if filter_to_groups:
+				# Keep names for group chats
+				pass
+			else:
+				cdict['groupName'] = ''
 		zipped.append(cdict)
 	zipped = list(reversed(sorted(zipped, key=lambda x: x['count'])))
 	# Truncate
 	zipped = zipped[:min(HOME_MAX_CONVERSATIONS, len(zipped))]
+	i = 1
 	for c in zipped:
+		if STRIP_PII and not filter_to_groups:
+			c['groupName'] = 'person #' + str(i)
+			i += 1
 		c['count_by_day'] = ia.get_count_timeline(int(c['id']))
 		num_days = len(c['count_by_day'])
 	return zipped, num_days
@@ -37,10 +55,12 @@ def main():
 def conversations():
 	c_metadatas = ia.get_conversations()
 	id_count_map = ia.get_message_counts()
-	zipped, num_days = zip_metrics_for_conversations(c_metadatas, id_count_map, ia)
+	filter_to_groups = request.args.get('groups') == '1'
+	zipped, num_days = zip_metrics_for_conversations(c_metadatas, id_count_map, ia, filter_to_groups)
 	return flask.jsonify({
 		'conversations': zipped,
-		'dates': list(reversed([(datetime.datetime.today() - datetime.timedelta(days=x)).strftime('%Y-%m-%d') for x in range(num_days)]))
+		'dates': list(reversed([(datetime.datetime.today() - datetime.timedelta(days=x)).strftime('%Y-%m-%d') for x in range(num_days)])),
+		'first_ts': ia.oldest_ts,
 		})
 
 def init():
