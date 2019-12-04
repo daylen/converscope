@@ -60,10 +60,13 @@ class CommandBar extends React.Component {
 
   render() {
     return (
-      <ToggleButtonGroup type="radio" name="radio" value={this.props.groups} onChange={this.props.callback} className="mb-3">
-        <ToggleButton value={"0"} variant="info">DMs</ToggleButton>
-        <ToggleButton value={"1"} variant="info">Groups</ToggleButton>
+      <div>
+      <ToggleButtonGroup type="radio" name="radio" value={this.props.groups} onChange={this.props.callback} className="">
+        <ToggleButton value={"0"} variant="warning">Direct Messages</ToggleButton>
+        <ToggleButton value={"1"} variant="warning">Group Chats</ToggleButton>
       </ToggleButtonGroup>
+      <hr />
+      </div>
     );
   }
 }
@@ -153,9 +156,14 @@ class App extends React.Component {
       <div className="container">
         <div className="row">
           <div className="col-12">
-            <div className="hero mt-3 mb-3 text-center">
-              <h1 className="display-4 font-weight-light">converscope</h1>
-              <p className="lead font-italic">9 years of daylen's texts</p>
+            <div class="jumbotron mt-3">
+              <h1 class="display-4">converscope</h1>
+              <p class="lead">a <a href="https://daylen.com/">daylen yang</a> data experiment</p>
+              <hr class="my-4" />
+              <p><b>What is this?</b> This is a visualization of every Facebook chat and iMessage I've ever sent/received in the last 9 years. <b>Each row is one person</b> (or group, if you flip the DMs/Groups toggle). The <b>x-axis is time</b>, and the <b>y-axis is the number of messages</b> sent that day. The rows are sorted by the all-time number of messages.</p>
+              <p><b>Really, 9 years?</b> Mostly! The Facebook data starts at the end of 2010. The iMessages start mid-2014.</p>
+              <p><b>Can I try my own chats?</b> Yes! The code is <a href="https://github.com/daylen/converscope">open source 🎉</a> so I encourage you to check it out.</p>
+              <p className="text-muted"><small>Inspired by <a href="http://hipsterdatascience.com/messages/" target="_blank">@cba's version</a></small></p>
             </div>
           </div>
         </div>
