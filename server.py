@@ -3,15 +3,15 @@ from constants import *
 import chat_pb2
 import flask
 from flask_cors import CORS
-from flask import Flask
-from flask import request
+from flask import Flask, request, send_from_directory
 from google.protobuf.json_format import MessageToDict
 import datetime
 import json
 import sys
+import os
 
 ia = None
-app = Flask(__name__)
+app = Flask(__name__, static_folder=APP_PATH)
 CORS(app)
 
 def zip_metrics_for_conversations(conversations, id_count_map, ia, filter_to_groups):
@@ -47,9 +47,14 @@ def zip_metrics_for_conversations(conversations, id_count_map, ia, filter_to_gro
 		num_days = len(c['count_by_day'])
 	return zipped, num_days
 
-@app.route('/')
-def main():
-	return 'Main page'
+# Serve React App
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve(path):
+    if path != "" and os.path.exists(app.static_folder + '/' + path):
+        return send_from_directory(app.static_folder, path)
+    else:
+        return send_from_directory(app.static_folder, 'index.html')
 
 @app.route('/api/conversations')
 def conversations():

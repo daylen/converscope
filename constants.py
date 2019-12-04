@@ -20,3 +20,4 @@ EXPORT_PATH_IMESSAGE = DATA_DIR + '/inbox_imessage'
 # Web app
 
 HOME_MAX_CONVERSATIONS = 25
+APP_PATH = 'converscope-react/build'

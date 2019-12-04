@@ -119,7 +119,7 @@ class App extends React.Component {
   }
 
   fetchData() {
-    fetch("http://dawn.local:5000/api/conversations?groups=" + this.state.groups)
+    fetch("/api/conversations?groups=" + this.state.groups)
       .then(res => res.json())
       .then(
         (result) => {
