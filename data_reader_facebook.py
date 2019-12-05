@@ -51,7 +51,7 @@ def read_fb_conversation(path):
 					# Sometimes for some odd reason, Facebook will have blank messages
 					pass
 				else:
-					message_proto.content = message_obj['content']
+					message_proto.content = message_obj['content'].encode('latin1').decode('utf8')
 			elif message_proto.content_type == chat_pb2.Message.CT_STICKER:
 				message_proto.media_uri.extend([message_obj['sticker']['uri']])
 			elif message_proto.content_type == chat_pb2.Message.CT_PHOTO:
