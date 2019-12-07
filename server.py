@@ -65,7 +65,7 @@ def conversations():
 	return flask.jsonify({
 		'conversations': zipped,
 		'dates': list(reversed([(datetime.datetime.today() - datetime.timedelta(days=x)).strftime('%Y-%m-%d') for x in range(num_days)])),
-		'first_ts': ia.oldest_ts,
+		'first_ts': ia.get_oldest_ts(),
 		})
 
 def init():

@@ -11,17 +11,11 @@ class InboxAnalyzer:
 
 	def __init__(self, inbox):
 		self.inbox = inbox
-		self.id_conversation_map = {}
-		# Precompute message counts so that we have an ordering
-		self.id_count_map = {}
-		for c in inbox.conversation:
-			if c.id in self.id_conversation_map:
-				raise Exception("Duplicate ID found")
-			self.id_conversation_map[c.id] = c
-			self.id_count_map[c.id] = len(c.message)
+		self.id_conversation_map = {c.id: c for c in inbox.conversation}
+		assert len(self.id_conversation_map) == len(inbox.conversation)
 		self.oldest_ts = sys.maxsize
 		for c_id in self.id_conversation_map.keys():
-			self.oldest_ts = min(self.oldest_ts, self.get_oldest_ts(c_id))
+			self.oldest_ts = min(self.oldest_ts, self.__get_oldest_ts(c_id))
 		print('InboxAnalyzer initialized,', len(self.id_conversation_map), 'conversations')
 
 	def get_conversations(self):
@@ -39,12 +33,21 @@ class InboxAnalyzer:
 		return c_metadatas
 
 	def get_message_counts(self):
-		return self.id_count_map
+		return {c.id: len(c.message) for c in self.inbox.conversation}
 
 	def get_conversation(self, c_id):
 		return self.id_conversation_map[c_id]
 
-	def get_oldest_ts(self, c_id):
+	def get_conversation_by_group_name(self, group_name):
+		for c in self.inbox.conversation:
+			if c.group_name == group_name:
+				return c
+		return None
+
+	def get_oldest_ts(self):
+		return self.oldest_ts
+
+	def __get_oldest_ts(self, c_id):
 		c = self.id_conversation_map[c_id]
 		if len(c.message) == 0:
 			return sys.maxsize
@@ -67,15 +70,18 @@ class InboxAnalyzer:
 		return hist.tolist()
 		
 
-def main():
+def print_messages(group_name, start_ts, end_ts):
 	f = open(EXPORT_PATH + ('.pbtxt' if USE_PBTXT else '.pb'), 'rb')
 	inbox = chat_pb2.Inbox()
 	inbox.ParseFromString(f.read())
 	f.close()
 	ia = InboxAnalyzer(inbox)
-	# hist = ia.get_count_timeline(955)
-	# np.set_printoptions(threshold=sys.maxsize)
-	print(ia.oldest_ts)
+	i = 0
+	conv = ia.get_conversation_by_group_name(group_name)
+	for message in conv.message:
+		if message.timestamp > start_ts and message.timestamp < end_ts:
+			print(i, message.timestamp, message.sender_name, ':', message.content)
+			i += 1
 
-if __name__ == '__main__':
-	main()
+# if __name__ == '__main__':
+# 	main()
