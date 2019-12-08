@@ -49,15 +49,10 @@ def main():
     """
 	Dump everything to a text file for finetuning GPT-2.
 	"""
-    f = open(EXPORT_PATH + '.pb', 'rb')
-    inbox = chat_pb2.Inbox()
-    inbox.ParseFromString(f.read())
-    f.close()
-
     random.seed(42)
     TS_SPLIT = 1433131200 + (1.5 * 60 * 60 * 24 * 365)
 
-    ia = InboxAnalyzer(inbox)
+    ia = InboxAnalyzer()
     print(sum(ia.id_count_map.values()), 'total messages')
     dump_for_gpt2(ia, ts_range=(0, TS_SPLIT), fname_prefix='dec2010_nov2016')
     dump_for_gpt2(ia,

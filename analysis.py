@@ -10,7 +10,13 @@ import time
 
 class InboxAnalyzer:
 
-    def __init__(self, inbox):
+    def __init__(self):
+        f = open(EXPORT_PATH + ('.pbtxt' if USE_PBTXT else '.pb'),
+                 'r' if USE_PBTXT else 'rb')
+        inbox = chat_pb2.Inbox()
+        inbox.ParseFromString(f.read())
+        f.close()
+
         self.inbox = inbox
         self.id_conversation_map = {c.id: c for c in inbox.conversation}
         assert len(self.id_conversation_map) == len(inbox.conversation)
@@ -76,21 +82,11 @@ class InboxAnalyzer:
                                        range=date_range)
         return hist.tolist()
 
-
-def print_messages(group_name, start_ts, end_ts):
-    f = open(EXPORT_PATH + ('.pbtxt' if USE_PBTXT else '.pb'), 'rb')
-    inbox = chat_pb2.Inbox()
-    inbox.ParseFromString(f.read())
-    f.close()
-    ia = InboxAnalyzer(inbox)
-    i = 0
-    conv = ia.get_conversation_by_group_name(group_name)
-    for message in conv.message:
-        if message.timestamp > start_ts and message.timestamp < end_ts:
-            print(i, message.timestamp, message.sender_name, ':',
-                  message.content)
-            i += 1
-
-
-# if __name__ == '__main__':
-# 	main()
+    def print_messages(self, group_name, start_ts, end_ts):
+        i = 0
+        conv = self.get_conversation_by_group_name(group_name)
+        for message in sorted(map(lambda x: x.timestamp, conv.message)):
+            if message.timestamp > start_ts and message.timestamp < end_ts:
+                print(i, message.timestamp, message.sender_name, ':',
+                      message.content)
+                i += 1

@@ -10,7 +10,7 @@ import json
 import sys
 import os
 
-ia = None
+ia = analysis.InboxAnalyzer()
 app = Flask(__name__, static_folder=APP_PATH)
 CORS(app)
 
@@ -78,15 +78,3 @@ def conversations():
         'first_ts':
             ia.get_oldest_ts(),
     })
-
-
-def init():
-    global ia
-    f = open(EXPORT_PATH + ('.pbtxt' if USE_PBTXT else '.pb'), 'rb')
-    inbox = chat_pb2.Inbox()
-    inbox.ParseFromString(f.read())
-    f.close()
-    ia = analysis.InboxAnalyzer(inbox)
-
-
-init()
