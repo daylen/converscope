@@ -12,6 +12,8 @@ def conv_to_string(conv, ts_range):
     ordered = sorted(in_range, key=lambda x: x.timestamp)
     transcript = ''
     for message in ordered:
+        if 'Say hi to your new Facebook friend' in message.content:
+            continue
         transcript += str.upper(
             message.sender_name) + ': ' + message.content + '\n\n'
     return transcript, len(ordered)
@@ -26,6 +28,9 @@ def dump_for_gpt2(ia, ts_range=(0, sys.maxsize), fname_prefix=''):
     for c_metadata in ia.get_conversations():
         conv = ia.get_conversation(c_metadata.id)
         transcript, count = conv_to_string(conv, ts_range)
+        # Do not include really short conversations
+        if count < 5:
+            continue
         if random.random() < TRAIN_PERCENT:
             train_txt += '<|startoftext|>\n'
             train_txt += transcript + '\n'
@@ -53,11 +58,11 @@ def main():
     TS_SPLIT = 1433131200 + (1.5 * 60 * 60 * 24 * 365)
 
     ia = InboxAnalyzer()
-    print(sum(ia.id_count_map.values()), 'total messages')
-    dump_for_gpt2(ia, ts_range=(0, TS_SPLIT), fname_prefix='dec2010_nov2016')
-    dump_for_gpt2(ia,
-                  ts_range=(TS_SPLIT, sys.maxsize),
-                  fname_prefix='nov2016_dec2019')
+    dump_for_gpt2(ia, ts_range=(0, sys.maxsize), fname_prefix='all_data_')
+    # dump_for_gpt2(ia, ts_range=(0, TS_SPLIT), fname_prefix='dec2010_nov2016')
+    # dump_for_gpt2(ia,
+    #               ts_range=(TS_SPLIT, sys.maxsize),
+    #               fname_prefix='nov2016_dec2019')
 
 
 if __name__ == '__main__':
