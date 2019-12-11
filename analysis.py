@@ -1,11 +1,12 @@
 from constants import *
 import chat_pb2
 from metric_pb2 import *
-from collections import Counter
+from collections import Counter, defaultdict
 import sys
 import numpy as np
 import datetime
 import time
+from enum import Enum
 
 
 class InboxAnalyzer:
@@ -40,8 +41,14 @@ class InboxAnalyzer:
             c_metadatas.append(c_metadata)
         return c_metadatas
 
-    def get_message_counts(self):
-        return {c.id: len(c.message) for c in self.inbox.conversation}
+    def get_message_counts(self, start_ts=0, end_ts=sys.maxsize):
+        return {
+            c.id: len(
+                list(
+                    filter(
+                        lambda m: m.timestamp > start_ts and m.timestamp <
+                        end_ts, c.message))) for c in self.inbox.conversation
+        }
 
     def get_conversation(self, c_id):
         return self.id_conversation_map[c_id]
@@ -82,11 +89,39 @@ class InboxAnalyzer:
                                        range=date_range)
         return hist.tolist()
 
-    def print_messages(self, group_name, start_ts, end_ts):
-        i = 0
-        conv = self.get_conversation_by_group_name(group_name)
-        for message in sorted(map(lambda x: x.timestamp, conv.message)):
-            if message.timestamp > start_ts and message.timestamp < end_ts:
-                print(i, message.timestamp, message.sender_name, ':',
-                      message.content)
-                i += 1
+
+def print_messages(conv, start_ts=0, end_ts=sys.maxsize):
+    i = 0
+    for message in sorted(conv.message, key=lambda m: m.timestamp):
+        if message.timestamp > start_ts and message.timestamp < end_ts:
+            print(
+                i,
+                datetime.datetime.fromtimestamp(message.timestamp).isoformat(),
+                message.sender_name, ':', message.content)
+            i += 1
+
+
+class CountGranularity(Enum):
+    MESSAGE = 1
+    CHARACTER = 2
+
+
+def get_counts_by_sender(conv, count_granularity):
+    if count_granularity == CountGranularity.MESSAGE:
+        return Counter(map(lambda x: x.sender_name, conv.message))
+    elif count_granularity == CountGranularity.CHARACTER:
+        c = defaultdict(int)
+        for m in conv.message:
+            c[m.sender_name] += len(m.content)
+        return c
+
+
+def main():
+    ia = InboxAnalyzer()
+    conv = ia.get_conversation_by_group_name('Bob')
+    print_messages(conv)
+    print(get_counts_by_sender(conv, CountGranularity.MESSAGE))
+
+
+if __name__ == '__main__':
+    main()
