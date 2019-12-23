@@ -6,6 +6,8 @@ import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup';
 import ToggleButton from 'react-bootstrap/ToggleButton';
 import ButtonToolbar from 'react-bootstrap/ButtonToolbar';
 import Button from 'react-bootstrap/Button';
+import DropdownButton from 'react-bootstrap/DropdownButton';
+import Dropdown from 'react-bootstrap/Dropdown';
 
 function ConversationPill(props) {
   return (
@@ -61,10 +63,20 @@ class CommandBar extends React.Component {
   render() {
     return (
       <div>
-      <ToggleButtonGroup type="radio" name="radio" value={this.props.groups} onChange={this.props.callback} className="">
+      <ButtonToolbar>
+      <ToggleButtonGroup type="radio" name="radio" value={this.props.groups} onChange={this.props.groups_callback} className="">
         <ToggleButton value={"0"} variant="warning">Direct Messages</ToggleButton>
         <ToggleButton value={"1"} variant="warning">Group Chats</ToggleButton>
       </ToggleButtonGroup>
+      &nbsp;
+      <DropdownButton id="sort-by-button" title={this.props.time_period} variant="warning">
+        <Dropdown.Item eventKey="all_time" onSelect={this.props.time_period_callback}>all time</Dropdown.Item>
+        <Dropdown.Item eventKey="last_year" onSelect={this.props.time_period_callback}>last year</Dropdown.Item>
+        <Dropdown.Item eventKey="high_school" onSelect={this.props.time_period_callback}>high school</Dropdown.Item>
+        <Dropdown.Item eventKey="college" onSelect={this.props.time_period_callback}>college</Dropdown.Item>
+        <Dropdown.Item eventKey="post_college" onSelect={this.props.time_period_callback}>post college</Dropdown.Item>
+      </DropdownButton>
+      </ButtonToolbar>
       <hr />
       </div>
     );
@@ -103,6 +115,7 @@ class App extends React.Component {
     super(props);
     this.state = {
       groups: "0",
+      time_period: "all_time",
       error: null,
       isLoaded: false,
       items: [],
@@ -113,21 +126,33 @@ class App extends React.Component {
   setGroups = (val) => {
     this.setState({
       groups: val,
+      time_period: this.state.time_period,
       error: null,
       isLoaded: false,
       items: [],
       dates: [],
     }, this.fetchData);
-    
+  }
+
+  setTimePeriod = (val) => {
+    this.setState({
+      groups: this.state.groups,
+      time_period: val,
+      error: null,
+      isLoaded: false,
+      items: [],
+      dates: [],
+    }, this.fetchData);
   }
 
   fetchData() {
-    fetch("/api/conversations?groups=" + this.state.groups)
+    fetch("/api/conversations?groups=" + this.state.groups + '&time_period=' + this.state.time_period)
       .then(res => res.json())
       .then(
         (result) => {
           this.setState({
             groups: this.state.groups,
+            time_period: this.state.time_period,
             isLoaded: true,
             items: result.conversations,
             dates: result.dates,
@@ -139,6 +164,7 @@ class App extends React.Component {
         (error) => {
           this.setState({
             groups: this.state.groups,
+            time_period: this.state.time_period,
             isLoaded: true,
             error: error,
           });
@@ -169,7 +195,7 @@ class App extends React.Component {
         </div>
         <div className="row">
           <div className="col-12">
-            <CommandBar groups={this.state.groups} callback={this.setGroups}/>
+            <CommandBar groups={this.state.groups} time_period={['Sort by: count ', <b>{this.state.time_period.replace('_', ' ')}</b>]} groups_callback={this.setGroups} time_period_callback={this.setTimePeriod}/>
             <ConversationList error={this.state.error} isLoaded={this.state.isLoaded} items={this.state.items} dates={this.state.dates} />
           </div>
         </div>

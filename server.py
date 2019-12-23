@@ -9,6 +9,8 @@ import datetime
 import json
 import sys
 import os
+import time
+from enum import Enum
 
 ia = analysis.InboxAnalyzer()
 app = Flask(__name__, static_folder=APP_PATH)
@@ -59,11 +61,28 @@ def serve(path):
     else:
         return send_from_directory(app.static_folder, 'index.html')
 
+TIME_RANGES = {
+    'all_time': (0, sys.maxsize),
+    'high_school': (0, HIGH_SCHOOL_GRAD_TS),
+    'college': (HIGH_SCHOOL_GRAD_TS, COLLEGE_GRAD_TS),
+    'post_college': (COLLEGE_GRAD_TS, sys.maxsize)
+}
+
+
+def get_time_range(time_period):
+    if time_period in TIME_RANGES:
+        return TIME_RANGES[time_period]
+    elif time_period == 'last_year':
+        return (time.time() - 60 * 60 * 24 * 365, sys.maxsize)
+    else:
+        return time_period[TimePeriod.ALL_TIME]
+
 
 @app.route('/api/conversations')
 def conversations():
     c_metadatas = ia.get_conversations()
-    id_count_map = ia.get_message_counts()
+    id_count_map = ia.get_message_counts(
+        *get_time_range(request.args.get('time_period')))
     filter_to_groups = request.args.get('groups') == '1'
     zipped, num_days = zip_metrics_for_conversations(c_metadatas, id_count_map,
                                                      ia, filter_to_groups)
