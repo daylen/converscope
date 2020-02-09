@@ -50,6 +50,9 @@ class InboxAnalyzer:
                         end_ts, c.message))) for c in self.inbox.conversation
         }
 
+    def exists(self, c_id):
+        return c_id in self.id_conversation_map
+
     def get_conversation(self, c_id):
         return self.id_conversation_map[c_id]
 

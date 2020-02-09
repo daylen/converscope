@@ -11,6 +11,8 @@ import sys
 import os
 import time
 from enum import Enum
+from collections import defaultdict
+import numpy as np
 
 ia = analysis.InboxAnalyzer()
 app = Flask(__name__, static_folder=APP_PATH)
@@ -61,6 +63,7 @@ def serve(path):
     else:
         return send_from_directory(app.static_folder, 'index.html')
 
+
 TIME_RANGES = {
     'all_time': (0, sys.maxsize),
     'high_school': (0, HIGH_SCHOOL_GRAD_TS),
@@ -97,3 +100,32 @@ def conversations():
         'first_ts':
             ia.get_oldest_ts(),
     })
+
+
+@app.route('/api/conversation')
+def conversation_details():
+    c_id = request.args.get('id')
+    if not ia.exists(int(c_id)):
+        return flask.jsonify(
+            {'error': 'Conversation ID ' + c_id + ' not found'})
+    c = ia.get_conversation(int(c_id))
+
+    # message count metric
+    counts_by_name = {}
+    for name in c.participant:
+        counts_by_name[name] = len(
+            list(filter(lambda x: x.sender_name == name, c.message)))
+    # char count
+    char_counts_by_name = {}
+    for name in c.participant:
+        char_counts_by_name[name] = sum(
+            map(lambda x: len(x.content),
+                filter(lambda x: x.sender_name == name, c.message)))
+
+    cdict = MessageToDict(c)
+    del cdict['message']
+    cdict['metrics'] = {
+        'messages_sent': counts_by_name,
+        'chars_sent': char_counts_by_name
+    }
+    return flask.jsonify(cdict)

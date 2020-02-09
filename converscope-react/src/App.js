@@ -13,7 +13,7 @@ function ConversationPill(props) {
   return (
     <div className="card mb-3">
       <div className="card-body">
-        <h5 className="">{props.group_name} <small className="text-muted">{props.message_count} messages</small></h5>
+        <h5 className="">ID {props.c_id}: {props.group_name} <small className="text-muted">{props.message_count} messages</small></h5>
         <div className="text-muted small">
           <ul className="participants">{props.participants.length > 2 ? props.participants.map((name) => <li key={props.c_id + name}>{name}</li>) : ""}</ul>
         </div>
