@@ -21,11 +21,11 @@ def get_content_type(message_obj):
         return chat_pb2.Message.CT_AUDIO
     # Message should be ignored. Currently we ignore phone/video calls,
     # events where someone is added/removed to a group, payments, and calendar plans.
-    if message_obj['type'] in set(
-        ['Call', 'Subscribe', 'Unsubscribe', 'Payment', 'Plan']):
+    if message_obj['type'] in set(['Call', 'Payment', 'Plan']):
         return chat_pb2.Message.CT_IGNORE
     # For now, process Share types as just text.
-    if message_obj['type'] == 'Generic' or message_obj['type'] == 'Share':
+    if message_obj['type'] in set(
+        ['Subscribe', 'Unsubscribe', 'Generic', 'Share']):
         return chat_pb2.Message.CT_TEXT
     print('Unknown type:', message_obj['type'])
     return chat_pb2.Message.CT_UNKNOWN
@@ -38,15 +38,15 @@ def read_fb_conversation(path):
     conversation = chat_pb2.Conversation()
     with open(path) as f:
         data = json.load(f)
-        # data = data
-        # print(data)
         conversation.group_name = data['title'].encode('latin1').decode('utf8')
-        for participant_obj in data['participants']:
-            conversation.participant.extend([participant_obj['name']])
+        # for participant_obj in data['participants']:
+        #     conversation.participant.extend([participant_obj['name']])
+        participants = set([p['name'] for p in data['participants']])
         KNOWN_FIELDS = set(['sender_name', 'timestamp_ms', 'content', 'type'])
         for message_obj in data['messages']:
             message_proto = conversation.message.add()
             message_proto.sender_name = message_obj['sender_name']
+            participants.add(message_proto.sender_name)
             message_proto.timestamp = message_obj['timestamp_ms'] // 1000
             message_proto.content_type = get_content_type(message_obj)
             if message_proto.content_type == chat_pb2.Message.CT_TEXT:
@@ -80,6 +80,8 @@ def read_fb_conversation(path):
                     'Unprocessed:',
                     chat_pb2.Message.ContentType.Name(
                         message_proto.content_type), message_obj)
+        conversation.participant.extend(list(participants))
+
     return conversation
 
 

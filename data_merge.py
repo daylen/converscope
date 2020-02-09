@@ -10,6 +10,8 @@ def combine_inboxes(inbox_arr):
     combined = chat_pb2.Inbox()
     parts_to_convs = {}
     for inbox in inbox_arr:
+        if len(inbox.conversation) == 0:
+            raise Exception("No conversations to merge")
         for conv in inbox.conversation:
             key = '+'.join(sorted(conv.participant))
             if key in parts_to_convs:
@@ -24,10 +26,21 @@ def combine_inboxes(inbox_arr):
     return combined
 
 
+def validate(inbox):
+    for conv in inbox.conversation:
+        actual_participants = set(map(lambda x: x.sender_name, conv.message))
+        for part in actual_participants:
+            if part not in conv.participant:
+                raise Exception('Participants field is messed up', conv)
+
+
 def main():
     inbox_fb = read_facebook(FB_IMPORT_PATH)
+    validate(inbox_fb)
     inbox_imessage = read_imessage(IMESSAGE_IMPORT_PATH)
+    validate(inbox_imessage)
     inbox = combine_inboxes([inbox_fb, inbox_imessage])
+    validate(inbox)
     if STRIP_PII:
         for c in inbox.conversation:
             for m in c.message:
