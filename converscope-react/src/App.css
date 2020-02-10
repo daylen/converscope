@@ -55,6 +55,12 @@ a:hover {
 	.jumbotron {
 		background-color: #094450;
 	}
+	.jumbotron hr {
+		border-color: rgba(255,255,255,0.4);
+	}
+	a {
+		color: #66b0ff;
+	}
 	a .card {
 		color: white;
 	}
@@ -64,5 +70,8 @@ a:hover {
 	}
 	.card:active {
 		background: rgba(255,255,255,0.15);
+	}
+	hr {
+		border-color: rgba(255,255,255,0.2);
 	}
 }

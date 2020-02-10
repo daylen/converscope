@@ -1,6 +1,8 @@
 import React from 'react';
-import { BrowserRouter as Router, Switch, Route, Link, useParams } from 'react-router-dom';
+import { BrowserRouter as Router, Switch, Route, Link} from 'react-router-dom';
 import * as constants from './constants.js';
+import ButtonToolbar from 'react-bootstrap/ButtonToolbar';
+import Button from 'react-bootstrap/Button';
 
 function metric_pretty_name(metric_short_name) {
   return metric_short_name.replace(/_/g, ' ');
@@ -11,10 +13,21 @@ function MetricRow(props) {
     <div>
     <hr />
     <h5 className="small-caps">{metric_pretty_name(props.metric_name)}</h5>
-    <div class="row">{Object.entries(props.values).map(([key, value]) =>
-      <div className="statistic col-sm-4"><div className="big-number">{value.toLocaleString()}</div><div className="small">{key}</div></div>)}</div>
+    <div class="row">{props.values.map((arr) =>
+      <div className="statistic col-sm-4"><div className="big-number">{arr[1].toLocaleString()}</div><div className="small">{arr[0]}</div></div>)}</div>
     </div>
   )
+}
+
+function DetailCommandBar(props) {
+  return (
+    <div>
+    <ButtonToolbar>
+    <Link to="/"><Button variant="warning">Back to list</Button></Link>
+    </ButtonToolbar>
+    <hr />
+    </div>
+  );
 }
 
 class DetailPage extends React.Component {
@@ -62,25 +75,24 @@ class DetailPage extends React.Component {
   render() {
     if (this.state.error) {
       return <div>Error: {this.state.error.message}</div>;
-    } else if (!this.state.isLoaded) {
-      return (
-        <div className="text-center">
-          <div className="spinner-border" role="status">
-            <span className="sr-only">Loading...</span>
-          </div>
-        </div>
-      );
     } else {
       return (
         <div>
-          <div className="text-danger">ID {this.props.c_id}</div>
-          <h4>{this.state.groupName}</h4>
-          <div className="text-muted small">
+          {this.state.isLoaded ? 
+            <div>
+            <div className="text-danger">ID {this.props.c_id}</div>
+            <h4>{this.state.groupName}</h4>
+            <div className="text-muted small">
               <ul className="participants">{this.state.participants.length > 0 ? this.state.participants.map((name) => <li key={this.state.c_id + name}>{name}</li>) : ""}</ul>
             </div>
             <div>
             {Object.entries(this.state.metrics).map(([key, value]) => <MetricRow metric_name={key} values={value} />)}
-            </div>
+            </div></div>
+          : <div className="text-center">
+              <div className="spinner-border" role="status">
+                <span className="sr-only">Loading...</span>
+              </div>
+            </div>}
         </div>
       );
     }

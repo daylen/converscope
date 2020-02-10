@@ -23,8 +23,11 @@ class InboxAnalyzer:
         self.id_conversation_map = {c.id: c for c in inbox.conversation}
         assert len(self.id_conversation_map) == len(inbox.conversation)
         self.oldest_ts = sys.maxsize
+        self.newest_ts = -1
         for c_id in self.id_conversation_map.keys():
-            self.oldest_ts = min(self.oldest_ts, self.__get_oldest_ts(c_id))
+            old, new = self.__get_extreme_ts(c_id)
+            self.oldest_ts = min(self.oldest_ts, old)
+            self.newest_ts = max(self.newest_ts, new)
         print('InboxAnalyzer initialized,', len(self.id_conversation_map),
               'conversations')
 
@@ -66,16 +69,20 @@ class InboxAnalyzer:
     def get_oldest_ts(self):
         return self.oldest_ts
 
-    def __get_oldest_ts(self, c_id):
+    def get_newest_ts(self):
+        return self.newest_ts
+
+    def __get_extreme_ts(self, c_id):
         c = self.id_conversation_map[c_id]
         if len(c.message) == 0:
-            return sys.maxsize
+            return sys.maxsize, -1
         # TODO hack: there appear to be some corrupted timestamps from ~2003. Filter to be >2007.
         return min(
             filter(lambda x: x > 1167638400,
-                   map(lambda x: x.timestamp, c.message)))
+                   map(lambda x: x.timestamp,
+                       c.message))), max(map(lambda x: x.timestamp, c.message))
 
-    def get_count_timeline(self, c_id, start_ts=-1):
+    def get_count_timeline(self, c_id):
         """
 		If start_ts is -1, uses the oldest ts in the inbox as the start_ts.
 		Bin granularity is by day.
@@ -83,11 +90,9 @@ class InboxAnalyzer:
 		"""
         c = self.id_conversation_map[c_id]
         messages = sorted(map(lambda x: x.timestamp, c.message))
-        if start_ts == -1:
-            start_ts = self.oldest_ts
-        num_days = (datetime.date.today() -
-                    datetime.date.fromtimestamp(start_ts)).days
-        date_range = (start_ts, time.time())
+        num_days = (datetime.date.fromtimestamp(self.newest_ts) -
+                    datetime.date.fromtimestamp(self.oldest_ts)).days
+        date_range = (self.oldest_ts, self.newest_ts)
         hist, bin_edges = np.histogram(messages,
                                        bins=num_days,
                                        range=date_range)
@@ -105,6 +110,12 @@ class InboxAnalyzer:
             if curr > best:
                 best = curr
         return best
+
+    def all_names(self):
+        names = set()
+        for c in self.inbox.conversation:
+            names.update(c.participant)
+        return names
 
 
 def print_messages(conv, start_ts=0, end_ts=sys.maxsize):

@@ -36,9 +36,13 @@ function ConversationPill(props) {
               pointHoverBorderWidth: 2,
               pointRadius: 1,
               pointHitRadius: 10,
-              data: props.count_by_day
+              data: props.count_by_day,
             }]
           }} height={"100%"} options={{
+            animation: {duration: 0},
+            hover: {animationDuration: 0},
+            responsiveAnimationDuration: 0,
+            elements: {line: {tension: 0}},
             maintainAspectRatio: false,
             legend: {
               display: false,
@@ -48,7 +52,10 @@ function ConversationPill(props) {
                 type: 'time',
                 time: {
                   unit: 'year',
-                }
+                },
+                minRotation: 0,
+                maxRotation: 0,
+                sampleSize: 1,
               }]
             }
           }} />
@@ -89,10 +96,32 @@ class CommandBar extends React.Component {
 }
 
 class ConversationList extends React.Component {
+  render() {
+    if (this.props.error) {
+      return <div>Error: {this.props.error.message}</div>;
+    } else {
+      return (
+        <div>
+          <CommandBar groups={this.props.groups} time_period={['Sort by: count ', <b>{this.props.time_period.replace('_', ' ')}</b>]} groups_callback={this.props.setGroups} time_period_callback={this.props.setTimePeriod}/>
+          {this.props.isLoaded ? 
+          this.props.items.map(item => (
+            <ConversationPill key={item.id} c_id={item.id} group_name={item.groupName} message_count={item.count} participants={item.participant} count_by_day={item.count_by_day} x_axis={this.props.dates} />
+          )) : <div className="text-center">
+          <div className="spinner-border" role="status">
+            <span className="sr-only">Loading...</span>
+          </div>
+        </div>}
+        </div>
+      );
+    }
+  }
+}
+
+class App extends React.Component {
+
   constructor(props) {
     super(props);
     this.state = {
-      c_id: '',
       groups: "0",
       time_period: "all_time",
       error: null,
@@ -104,7 +133,6 @@ class ConversationList extends React.Component {
 
   setGroups = (val) => {
     this.setState({
-      c_id: '',
       groups: val,
       time_period: this.state.time_period,
       error: null,
@@ -116,7 +144,6 @@ class ConversationList extends React.Component {
 
   setTimePeriod = (val) => {
     this.setState({
-      c_id: '',
       groups: this.state.groups,
       time_period: val,
       error: null,
@@ -129,7 +156,6 @@ class ConversationList extends React.Component {
   fetchData = (forced) => {
     if (!forced && this.isLoaded) return;
     let url = constants.URL_PREFIX + "/api/conversations?groups=" + this.state.groups + '&time_period=' + this.state.time_period;
-    console.log(url);
     fetch(url)
       .then(res => res.json())
       .then(
@@ -160,39 +186,14 @@ class ConversationList extends React.Component {
     this.fetchData(true);
   }
 
-  render() {
-    if (this.state.error) {
-      return <div>Error: {this.state.error.message}</div>;
-    } else if (!this.state.isLoaded) {
-      return (
-        <div className="text-center">
-          <div className="spinner-border" role="status">
-            <span className="sr-only">Loading...</span>
-          </div>
-        </div>
-      );
-    } else {
-      return (
-        <div>
-          <CommandBar groups={this.state.groups} time_period={['Sort by: count ', <b>{this.state.time_period.replace('_', ' ')}</b>]} groups_callback={this.setGroups} time_period_callback={this.setTimePeriod}/>
-          {this.state.items.map(item => (
-            <ConversationPill key={item.id} c_id={item.id} group_name={item.groupName} message_count={item.count} participants={item.participant} count_by_day={item.count_by_day} x_axis={this.state.dates} />
-          ))}
-        </div>
-      );
-    }
-  }
-}
-
-class App extends React.Component {
-
   render = () => {
     return (
       <div className="container">
+        <Router>
         <div className="row">
           <div className="col-12">
             <div class="jumbotron mt-3">
-              <h1 class="display-4">converscope</h1>
+              <h1 class="display-4"><Link to="/">converscope</Link></h1>
               <p class="lead">a <a href="https://daylen.com/">daylen yang</a> data experiment</p>
               {/*<hr class="my-4" />
               <p><b>What is this?</b> This is a visualization of every Facebook chat and iMessage I've ever sent/received in the last 10 years. <b>Each row is one person</b> (or group, if you flip the DMs/Groups toggle). The <b>x-axis is time</b>, and the <b>y-axis is the number of messages</b> sent that day. The rows are sorted by the all-time number of messages.</p>
@@ -204,14 +205,13 @@ class App extends React.Component {
         </div>
         <div className="row">
           <div className="col-12">
-          <Router>
             <Switch>
-              <Route exact path="/" component={ConversationList} />
+              <Route exact path="/" render={() => (<ConversationList groups={this.state.groups} time_period={this.state.time_period} error={this.state.error} isLoaded={this.state.isLoaded} items={this.state.items} dates={this.state.dates} setGroups={this.setGroups} setTimePeriod={this.setTimePeriod} />)} />
               <Route path="/detail/:id" render={({match}) => (<DetailPage c_id={match.params.id} />)}/>
             </Switch>
-          </Router>
           </div>
         </div>
+        </Router>
       </div>
     );
   }

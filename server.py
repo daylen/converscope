@@ -18,6 +18,45 @@ app = Flask(__name__, static_folder=APP_PATH)
 CORS(app)
 
 
+def strip_group_name(group_name):
+    names = ia.all_names()
+    names.remove(SELF_NAME)
+    for name in names:
+        if name in group_name:
+            return 'XXX'
+    return group_name
+
+
+def maybe_strip_pii(c):
+    if STRIP_PII:
+        c['groupName'] = strip_group_name(c['groupName'])
+        c['participant'] = [
+            'XXX' if name != SELF_NAME else SELF_NAME
+            for name in c['participant']
+        ]
+    # Always delete messages even if STRIP_PII is false
+    if 'message' in c:
+        del c['message']
+
+
+def maybe_strip_names(arr_of_arr):
+    if not STRIP_PII:
+        return arr_of_arr
+    names = ia.all_names()
+    names.remove(SELF_NAME)
+    # print(names)
+    # stripped = []
+    for i in range(len(arr_of_arr)):
+        # x2 = []
+        for j in range(len(arr_of_arr[i])):
+            if not isinstance(arr_of_arr[i][j], str):
+                continue
+            for name in names:
+                if name in arr_of_arr[i][j]:
+                    arr_of_arr[i][j] = arr_of_arr[i][j].replace(name, 'XXX')
+    return arr_of_arr
+
+
 def zip_metrics_for_conversations(conversations, id_count_map, ia,
                                   filter_to_groups):
     """
@@ -32,22 +71,12 @@ def zip_metrics_for_conversations(conversations, id_count_map, ia,
             continue
         cdict = MessageToDict(c)
         cdict['count'] = id_count_map[c.id] if c.id in id_count_map else -1
-        if STRIP_PII:
-            cdict['participant'] = []
-            if filter_to_groups:
-                # Keep names for group chats
-                pass
-            else:
-                cdict['groupName'] = ''
         zipped.append(cdict)
     zipped = list(reversed(sorted(zipped, key=lambda x: x['count'])))
     # Truncate
     zipped = zipped[:min(HOME_MAX_CONVERSATIONS, len(zipped))]
-    i = 1
     for c in zipped:
-        if STRIP_PII and not filter_to_groups:
-            c['groupName'] = 'person #' + str(i)
-            i += 1
+        maybe_strip_pii(c)
         c['count_by_day'] = ia.get_count_timeline(int(c['id']))
         num_days = len(c['count_by_day'])
     return zipped, num_days
@@ -93,11 +122,9 @@ def conversations():
             zipped,
         'dates':
             list(
-                reversed([(datetime.datetime.today() -
+                reversed([(datetime.date.fromtimestamp(ia.get_newest_ts()) -
                            datetime.timedelta(days=x)).strftime('%Y-%m-%d')
                           for x in range(num_days)])),
-        'first_ts':
-            ia.get_oldest_ts(),
     })
 
 
@@ -111,32 +138,37 @@ def conversation_details():
     c = ia.get_conversation(c_id)
 
     # message count metric
-    counts_by_name = {}
+    counts_by_name = []
     for name in c.participant:
-        counts_by_name[name] = len(
-            list(filter(lambda x: x.sender_name == name, c.message)))
+        counts_by_name.append([
+            name,
+            len(list(filter(lambda x: x.sender_name == name, c.message)))
+        ])
     # char count
-    char_counts_by_name = {}
+    char_counts_by_name = []
     for name in c.participant:
-        char_counts_by_name[name] = sum(
-            map(lambda x: len(x.content),
-                filter(lambda x: x.sender_name == name, c.message)))
+        char_counts_by_name.append([
+            name,
+            sum(
+                map(lambda x: len(x.content),
+                    filter(lambda x: x.sender_name == name, c.message)))
+        ])
     # most used emoji
     emoji_list_by_name = analysis.emoji_counts(c)
-    pop_emoji_by_name = {}
+    pop_emoji_by_name = []
     for (name, emojis) in emoji_list_by_name.items():
         the_emoji, num_times = Counter(emojis).most_common(1)[0]
-        pop_emoji_by_name[name + ' used ' + str(num_times) + ' time' +
-                          ('' if num_times == 1 else 's')] = the_emoji
+        pop_emoji_by_name.append([
+            name + ' used ' + str(num_times) + ' time' +
+            ('' if num_times == 1 else 's'), the_emoji
+        ])
 
     cdict = MessageToDict(c)
-    del cdict['message']
+    maybe_strip_pii(cdict)
     cdict['metrics'] = {
-        'messages_sent': counts_by_name,
-        'characters_sent': char_counts_by_name,
-        'most_used_emoji': pop_emoji_by_name,
-        'longest_streak': {
-            'days': ia.longest_streak_days(c_id)
-        }
+        'messages_sent': maybe_strip_names(counts_by_name),
+        'characters_sent': maybe_strip_names(char_counts_by_name),
+        'most_used_emoji': maybe_strip_names(pop_emoji_by_name),
+        'longest_streak': [['days', ia.longest_streak_days(c_id)]]
     }
     return flask.jsonify(cdict)

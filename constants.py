@@ -2,12 +2,12 @@ DATA_DIR = './data/'
 
 USE_PBTXT = False
 
-# If true, does not store messages in the inbox file, and redacts names in the web app
-STRIP_PII = False
+# If true, redacts names in the web app
+STRIP_PII = True
 
 # Data import/export
 
-FB_IMPORT_PATH = DATA_DIR + '/facebook-daylenyang-json/messages'
+FB_IMPORT_PATH = DATA_DIR + '/fb-dump-2020-01-26/messages'
 
 IMESSAGE_IMPORT_PATH = DATA_DIR + '/chat.db'
 CONTACTS_PATH = DATA_DIR + 'contacts.csv'

@@ -1,5 +1,4 @@
 from data_reader_facebook import read_facebook
-from data_reader_facebook import assign_conversation_ids
 from data_reader_imessage import read_imessage
 from constants import *
 import chat_pb2
@@ -22,7 +21,9 @@ def combine_inboxes(inbox_arr):
     for conv in parts_to_convs.values():
         combined.conversation.add().CopyFrom(conv)
     print(parts_to_convs.keys())
-    assign_conversation_ids(combined)
+    for conv in combined.conversation:
+        key = '+'.join(sorted(conv.participant))
+        conv.id = hash(key)
     return combined
 
 
@@ -41,11 +42,6 @@ def main():
     validate(inbox_imessage)
     inbox = combine_inboxes([inbox_fb, inbox_imessage])
     validate(inbox)
-    if STRIP_PII:
-        for c in inbox.conversation:
-            for m in c.message:
-                m.content = ""
-                del m.media_uri[:]
 
     # print(inbox)
     if USE_PBTXT:
