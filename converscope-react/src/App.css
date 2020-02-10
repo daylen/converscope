@@ -1,3 +1,4 @@
+
 .jumbotron {
 	background-color: #e3f8fc;
 }
@@ -16,16 +17,52 @@
 .chart {
 	height: 200px;
 }
-/*.card {
+.card {
 	transition: 0.15s;
+	background: rgba(255,255,255,0.05);
 }
 .card:hover {
 	box-shadow: 0 25px 60px 0 #ccc;
 	cursor: pointer;
 	transform: scale(1.02);
 }
+a .card {
+	color: black;
+}
+a:hover {
+	text-decoration: none;
+}
 .card:active {
 	background: #f7f7f7;
 	transform: scale(1.01);
 	transition: 0s;
-}*/
+}
+.small-caps {
+	font-variant: small-caps;
+}
+.statistic {
+	margin-bottom: 15px;
+}
+.big-number {
+	font-weight: 300;
+	font-size: 3rem;
+}
+@media (prefers-color-scheme: dark) {
+	body {
+		background: #111;
+		color: #eee;
+	}
+	.jumbotron {
+		background-color: #094450;
+	}
+	a .card {
+		color: white;
+	}
+	.card:hover {
+		box-shadow: 0 25px 60px 0 #444;
+		border: 1px solid #aaa;
+	}
+	.card:active {
+		background: rgba(255,255,255,0.15);
+	}
+}

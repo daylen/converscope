@@ -8,12 +8,16 @@ import ButtonToolbar from 'react-bootstrap/ButtonToolbar';
 import Button from 'react-bootstrap/Button';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import Dropdown from 'react-bootstrap/Dropdown';
+import * as constants from './constants.js';
+import DetailPage from './detail.js';
+import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 
 function ConversationPill(props) {
   return (
+    <Link to={'/detail/' + props.c_id}>
     <div className="card mb-3">
       <div className="card-body">
-        <h5 className="">ID {props.c_id}: {props.group_name} <small className="text-muted">{props.message_count} messages</small></h5>
+        <h5 className=""><small className="text-danger">ID {props.c_id}</small> {props.group_name} <small className="text-muted">{props.message_count} messages</small></h5>
         <div className="text-muted small">
           <ul className="participants">{props.participants.length > 2 ? props.participants.map((name) => <li key={props.c_id + name}>{name}</li>) : ""}</ul>
         </div>
@@ -52,6 +56,7 @@ function ConversationPill(props) {
 
       </div>
     </div>
+    </Link>
   );
 }
 
@@ -86,34 +91,8 @@ class CommandBar extends React.Component {
 class ConversationList extends React.Component {
   constructor(props) {
     super(props);
-  }
-
-  render() {
-    if (this.props.error) {
-      return <div>Error: {this.props.error.message}</div>;
-    } else if (!this.props.isLoaded) {
-      return (
-        <div className="text-center">
-          <div className="spinner-border" role="status">
-            <span className="sr-only">Loading...</span>
-          </div>
-        </div>
-      );
-    } else {
-      return (
-          this.props.items.map(item => (
-            <ConversationPill key={item.id} c_id={item.id} group_name={item.groupName} message_count={item.count} participants={item.participant} count_by_day={item.count_by_day} x_axis={this.props.dates} />
-          ))
-      );
-    }
-  }
-}
-
-class App extends React.Component {
-
-  constructor(props) {
-    super(props);
     this.state = {
+      c_id: '',
       groups: "0",
       time_period: "all_time",
       error: null,
@@ -125,28 +104,33 @@ class App extends React.Component {
 
   setGroups = (val) => {
     this.setState({
+      c_id: '',
       groups: val,
       time_period: this.state.time_period,
       error: null,
       isLoaded: false,
       items: [],
       dates: [],
-    }, this.fetchData);
+    }, () => {this.fetchData(true)});
   }
 
   setTimePeriod = (val) => {
     this.setState({
+      c_id: '',
       groups: this.state.groups,
       time_period: val,
       error: null,
       isLoaded: false,
       items: [],
       dates: [],
-    }, this.fetchData);
+    }, () => {this.fetchData(true)});
   }
 
-  fetchData() {
-    fetch("/api/conversations?groups=" + this.state.groups + '&time_period=' + this.state.time_period)
+  fetchData = (forced) => {
+    if (!forced && this.isLoaded) return;
+    let url = constants.URL_PREFIX + "/api/conversations?groups=" + this.state.groups + '&time_period=' + this.state.time_period;
+    console.log(url);
+    fetch(url)
       .then(res => res.json())
       .then(
         (result) => {
@@ -173,33 +157,61 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    this.fetchData();
+    this.fetchData(true);
   }
+
+  render() {
+    if (this.state.error) {
+      return <div>Error: {this.state.error.message}</div>;
+    } else if (!this.state.isLoaded) {
+      return (
+        <div className="text-center">
+          <div className="spinner-border" role="status">
+            <span className="sr-only">Loading...</span>
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <div>
+          <CommandBar groups={this.state.groups} time_period={['Sort by: count ', <b>{this.state.time_period.replace('_', ' ')}</b>]} groups_callback={this.setGroups} time_period_callback={this.setTimePeriod}/>
+          {this.state.items.map(item => (
+            <ConversationPill key={item.id} c_id={item.id} group_name={item.groupName} message_count={item.count} participants={item.participant} count_by_day={item.count_by_day} x_axis={this.state.dates} />
+          ))}
+        </div>
+      );
+    }
+  }
+}
+
+class App extends React.Component {
 
   render = () => {
     return (
-      <div>
       <div className="container">
         <div className="row">
           <div className="col-12">
             <div class="jumbotron mt-3">
               <h1 class="display-4">converscope</h1>
               <p class="lead">a <a href="https://daylen.com/">daylen yang</a> data experiment</p>
-              <hr class="my-4" />
-              <p><b>What is this?</b> This is a visualization of every Facebook chat and iMessage I've ever sent/received in the last 9 years. <b>Each row is one person</b> (or group, if you flip the DMs/Groups toggle). The <b>x-axis is time</b>, and the <b>y-axis is the number of messages</b> sent that day. The rows are sorted by the all-time number of messages.</p>
-              <p><b>Really, 9 years?</b> Mostly! The Facebook data starts at the end of 2010. The iMessages start mid-2014.</p>
+              {/*<hr class="my-4" />
+              <p><b>What is this?</b> This is a visualization of every Facebook chat and iMessage I've ever sent/received in the last 10 years. <b>Each row is one person</b> (or group, if you flip the DMs/Groups toggle). The <b>x-axis is time</b>, and the <b>y-axis is the number of messages</b> sent that day. The rows are sorted by the all-time number of messages.</p>
+              <p><b>Really, 10 years?</b> Mostly! The Facebook data starts at the end of 2010. The iMessages start mid-2014.</p>
               <p><b>Can I try my own chats?</b> Yes! The code is <a href="https://github.com/daylen/converscope">open source 🎉</a> so I encourage you to check it out.</p>
-              <p className="text-muted"><small>Inspired by <a href="http://hipsterdatascience.com/messages/" target="_blank">@cba's version</a></small></p>
+              <p className="text-muted"><small>Inspired by <a href="http://hipsterdatascience.com/messages/" target="_blank">@cba's version</a></small></p>*/}
             </div>
           </div>
         </div>
         <div className="row">
           <div className="col-12">
-            <CommandBar groups={this.state.groups} time_period={['Sort by: count ', <b>{this.state.time_period.replace('_', ' ')}</b>]} groups_callback={this.setGroups} time_period_callback={this.setTimePeriod}/>
-            <ConversationList error={this.state.error} isLoaded={this.state.isLoaded} items={this.state.items} dates={this.state.dates} />
+          <Router>
+            <Switch>
+              <Route exact path="/" component={ConversationList} />
+              <Route path="/detail/:id" render={({match}) => (<DetailPage c_id={match.params.id} />)}/>
+            </Switch>
+          </Router>
           </div>
         </div>
-      </div>
       </div>
     );
   }
