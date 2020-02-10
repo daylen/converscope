@@ -7,6 +7,7 @@ import numpy as np
 import datetime
 import time
 from enum import Enum
+from emoji import UNICODE_EMOJI
 
 
 class InboxAnalyzer:
@@ -92,6 +93,19 @@ class InboxAnalyzer:
                                        range=date_range)
         return hist.tolist()
 
+    def longest_streak_days(self, c_id):
+        hist = self.get_count_timeline(c_id)
+        best = 0
+        curr = 0
+        for count in hist:
+            if count == 0:
+                curr = 0
+            else:
+                curr += 1
+            if curr > best:
+                best = curr
+        return best
+
 
 def print_messages(conv, start_ts=0, end_ts=sys.maxsize):
     i = 0
@@ -124,6 +138,15 @@ def main():
     conv = ia.get_conversation_by_group_name('Bob')
     print_messages(conv)
     print(get_counts_by_sender(conv, CountGranularity.MESSAGE))
+
+
+def emoji_counts(conv):
+    emoji_list_by_name = defaultdict(list)
+    for msg in conv.message:
+        for char in msg.content:
+            if char in UNICODE_EMOJI:
+                emoji_list_by_name[msg.sender_name].append(char)
+    return emoji_list_by_name
 
 
 if __name__ == '__main__':

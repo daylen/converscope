@@ -11,8 +11,7 @@ import sys
 import os
 import time
 from enum import Enum
-from collections import defaultdict
-import numpy as np
+from collections import defaultdict, Counter
 
 ia = analysis.InboxAnalyzer()
 app = Flask(__name__, static_folder=APP_PATH)
@@ -108,7 +107,8 @@ def conversation_details():
     if not ia.exists(int(c_id)):
         return flask.jsonify(
             {'error': 'Conversation ID ' + c_id + ' not found'})
-    c = ia.get_conversation(int(c_id))
+    c_id = int(c_id)
+    c = ia.get_conversation(c_id)
 
     # message count metric
     counts_by_name = {}
@@ -121,11 +121,22 @@ def conversation_details():
         char_counts_by_name[name] = sum(
             map(lambda x: len(x.content),
                 filter(lambda x: x.sender_name == name, c.message)))
+    # most used emoji
+    emoji_list_by_name = analysis.emoji_counts(c)
+    pop_emoji_by_name = {}
+    for (name, emojis) in emoji_list_by_name.items():
+        the_emoji, num_times = Counter(emojis).most_common(1)[0]
+        pop_emoji_by_name[name + ' used ' + str(num_times) + ' time' +
+                          ('' if num_times == 1 else 's')] = the_emoji
 
     cdict = MessageToDict(c)
     del cdict['message']
     cdict['metrics'] = {
         'messages_sent': counts_by_name,
-        'chars_sent': char_counts_by_name
+        'characters_sent': char_counts_by_name,
+        'most_used_emoji': pop_emoji_by_name,
+        'longest_streak': {
+            'days': ia.longest_streak_days(c_id)
+        }
     }
     return flask.jsonify(cdict)

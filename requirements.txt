@@ -2,3 +2,4 @@ protobuf
 flask
 flask_cors
 numpy
+emoji

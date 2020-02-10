@@ -3,23 +3,18 @@ import { BrowserRouter as Router, Switch, Route, Link, useParams } from 'react-r
 import * as constants from './constants.js';
 
 function metric_pretty_name(metric_short_name) {
-	if (metric_short_name == 'chars_sent') {
-		return 'Characters Sent';
-	}
-	if (metric_short_name == 'messages_sent') {
-		return 'Messages Sent';
-	}
+  return metric_short_name.replace(/_/g, ' ');
 }
 
 function MetricRow(props) {
-	return (
-		<div>
-		<h5 className="small-caps">{metric_pretty_name(props.metric_name)}</h5>
-		<div class="row">{Object.entries(props.values).map(([key, value]) =>
-			<div className="statistic col-sm-4"><div className="big-number">{value.toLocaleString()}</div><div className="small">{key}</div></div>)}</div>
-		<hr />
-		</div>
-	)
+  return (
+    <div>
+    <hr />
+    <h5 className="small-caps">{metric_pretty_name(props.metric_name)}</h5>
+    <div class="row">{Object.entries(props.values).map(([key, value]) =>
+      <div className="statistic col-sm-4"><div className="big-number">{value.toLocaleString()}</div><div className="small">{key}</div></div>)}</div>
+    </div>
+  )
 }
 
 class DetailPage extends React.Component {
@@ -35,8 +30,8 @@ class DetailPage extends React.Component {
   }
 
   foo = (forced) => {
-  	let url = constants.URL_PREFIX + "/api/conversation?id=" + this.props.c_id;
-  	console.log(url);
+    let url = constants.URL_PREFIX + "/api/conversation?id=" + this.props.c_id;
+    console.log(url);
     fetch(url)
       .then(res => res.json())
       .then(
@@ -78,13 +73,14 @@ class DetailPage extends React.Component {
     } else {
       return (
         <div>
-        	<h4>{this.state.groupName}</h4>
-        	<div className="text-muted small">
-          		<ul className="participants">{this.state.participants.length > 0 ? this.state.participants.map((name) => <li key={this.state.c_id + name}>{name}</li>) : ""}</ul>
-          	</div>
-          	<div>
-          	{Object.entries(this.state.metrics).map(([key, value]) => <MetricRow metric_name={key} values={value} />)}
-          	</div>
+          <div className="text-danger">ID {this.props.c_id}</div>
+          <h4>{this.state.groupName}</h4>
+          <div className="text-muted small">
+              <ul className="participants">{this.state.participants.length > 0 ? this.state.participants.map((name) => <li key={this.state.c_id + name}>{name}</li>) : ""}</ul>
+            </div>
+            <div>
+            {Object.entries(this.state.metrics).map(([key, value]) => <MetricRow metric_name={key} values={value} />)}
+            </div>
         </div>
       );
     }
