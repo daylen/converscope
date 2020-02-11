@@ -89,14 +89,21 @@ class InboxAnalyzer:
 		End ts is today.
 		"""
         c = self.id_conversation_map[c_id]
-        messages = sorted(map(lambda x: x.timestamp, c.message))
-        num_days = (datetime.date.fromtimestamp(self.newest_ts) -
-                    datetime.date.fromtimestamp(self.oldest_ts)).days
-        date_range = (self.oldest_ts, self.newest_ts)
-        hist, bin_edges = np.histogram(messages,
-                                       bins=num_days,
-                                       range=date_range)
-        return hist.tolist()
+        hist = defaultdict(int)
+        for m in c.message:
+            date_str = datetime.date.fromtimestamp(m.timestamp).isoformat()
+            hist[date_str] += 1
+        counts = [hist[x] if x in hist else 0 for x in self.get_date_range()]
+        return counts
+
+    def get_date_range(self):
+        date_range = (datetime.date.fromtimestamp(self.oldest_ts),
+                      datetime.date.fromtimestamp(self.newest_ts))
+        dates = [date_range[0]]
+        while dates[-1] != date_range[1]:
+            dates.append(dates[-1] + datetime.timedelta(days=1))
+        dates = list(map(lambda x: x.isoformat(), dates))
+        return dates
 
     def longest_streak_days(self, c_id):
         hist = self.get_count_timeline(c_id)

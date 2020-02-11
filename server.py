@@ -118,13 +118,8 @@ def conversations():
     zipped, num_days = zip_metrics_for_conversations(c_metadatas, id_count_map,
                                                      ia, filter_to_groups)
     return flask.jsonify({
-        'conversations':
-            zipped,
-        'dates':
-            list(
-                reversed([(datetime.date.fromtimestamp(ia.get_newest_ts()) -
-                           datetime.timedelta(days=x)).strftime('%Y-%m-%d')
-                          for x in range(num_days)])),
+        'conversations': zipped,
+        'dates': ia.get_date_range(),
     })
 
 
