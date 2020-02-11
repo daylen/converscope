@@ -3,7 +3,7 @@ DATA_DIR = './data/'
 USE_PBTXT = False
 
 # If true, redacts names in the web app
-STRIP_PII = True
+STRIP_PII = False
 HASH_SALT = ''
 
 # Data import/export
@@ -19,7 +19,7 @@ EXPORT_PATH_FB = DATA_DIR + '/inbox_fb'
 EXPORT_PATH_IMESSAGE = DATA_DIR + '/inbox_imessage'
 
 # Web app
-
+TIME_ZONE = 'America/Los_Angeles'
 HOME_MAX_CONVERSATIONS = 20
 APP_PATH = 'converscope-react/build'
 

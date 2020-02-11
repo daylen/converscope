@@ -13,6 +13,10 @@ import time
 from enum import Enum
 from collections import defaultdict, Counter
 
+# Force Pacific Time Zone
+os.environ['TZ'] = TIME_ZONE
+time.tzset()
+
 ia = analysis.InboxAnalyzer()
 app = Flask(__name__, static_folder=APP_PATH)
 CORS(app)
