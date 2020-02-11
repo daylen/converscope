@@ -106,17 +106,19 @@ class InboxAnalyzer:
         return dates
 
     def longest_streak_days(self, c_id):
-        hist = self.get_count_timeline(c_id)
+        hist = zip(self.get_count_timeline(c_id), self.get_date_range())
         best = 0
+        best_end_date = ''
         curr = 0
-        for count in hist:
+        for count, date in hist:
             if count == 0:
                 curr = 0
             else:
                 curr += 1
             if curr > best:
                 best = curr
-        return best
+                best_end_date = date
+        return best, best_end_date
 
     def all_names(self):
         names = set()
@@ -153,9 +155,8 @@ def get_counts_by_sender(conv, count_granularity):
 
 def main():
     ia = InboxAnalyzer()
-    conv = ia.get_conversation_by_group_name('Bob')
-    print_messages(conv)
-    print(get_counts_by_sender(conv, CountGranularity.MESSAGE))
+    conv = ia.get_conversation('')
+    print_messages(conv, 1467529200, 1469170800)
 
 
 def emoji_counts(conv):

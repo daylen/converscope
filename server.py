@@ -156,6 +156,9 @@ def conversation_details():
             name + ' used ' + str(num_times) + ' time' +
             ('' if num_times == 1 else 's'), the_emoji
         ])
+    # longest streak
+    streak_length, end_date = ia.longest_streak_days(c_id)
+    longest_streak = [['days, ending on ' + end_date, streak_length]]
 
     cdict = MessageToDict(c)
     maybe_strip_pii(cdict)
@@ -163,6 +166,6 @@ def conversation_details():
         'messages_sent': maybe_strip_names(counts_by_name),
         'characters_sent': maybe_strip_names(char_counts_by_name),
         'most_used_emoji': maybe_strip_names(pop_emoji_by_name),
-        'longest_streak': [['days', ia.longest_streak_days(c_id)]]
+        'longest_streak': longest_streak
     }
     return flask.jsonify(cdict)
