@@ -26,7 +26,7 @@ def combine_inboxes(inbox_arr):
     # Assign IDs
     for conv in combined.conversation:
         key = '+'.join(sorted(conv.participant))
-        conv.id = hashlib.sha1(key.encode()).hexdigest()
+        conv.id = hashlib.sha1((key + HASH_SALT).encode()).hexdigest()
     return combined
 
 

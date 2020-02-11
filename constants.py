@@ -4,6 +4,7 @@ USE_PBTXT = False
 
 # If true, redacts names in the web app
 STRIP_PII = True
+HASH_SALT = ''
 
 # Data import/export
 
