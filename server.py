@@ -77,7 +77,7 @@ def zip_metrics_for_conversations(conversations, id_count_map, ia,
     zipped = zipped[:min(HOME_MAX_CONVERSATIONS, len(zipped))]
     for c in zipped:
         maybe_strip_pii(c)
-        c['count_by_day'] = ia.get_count_timeline(int(c['id']))
+        c['count_by_day'] = ia.get_count_timeline(c['id'])
         num_days = len(c['count_by_day'])
     return zipped, num_days
 
@@ -126,10 +126,9 @@ def conversations():
 @app.route('/api/conversation')
 def conversation_details():
     c_id = request.args.get('id')
-    if not ia.exists(int(c_id)):
+    if not ia.exists(c_id):
         return flask.jsonify(
             {'error': 'Conversation ID ' + c_id + ' not found'})
-    c_id = int(c_id)
     c = ia.get_conversation(c_id)
 
     # message count metric

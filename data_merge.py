@@ -3,6 +3,7 @@ from data_reader_imessage import read_imessage
 from constants import *
 import chat_pb2
 import google.protobuf.text_format as text_format
+import hashlib
 
 
 def combine_inboxes(inbox_arr):
@@ -12,6 +13,7 @@ def combine_inboxes(inbox_arr):
         if len(inbox.conversation) == 0:
             raise Exception("No conversations to merge")
         for conv in inbox.conversation:
+            # Use participants to merge between iMessage and Facebook
             key = '+'.join(sorted(conv.participant))
             if key in parts_to_convs:
                 # Merge messages
@@ -21,9 +23,10 @@ def combine_inboxes(inbox_arr):
     for conv in parts_to_convs.values():
         combined.conversation.add().CopyFrom(conv)
     print(parts_to_convs.keys())
+    # Assign IDs
     for conv in combined.conversation:
         key = '+'.join(sorted(conv.participant))
-        conv.id = hash(key)
+        conv.id = hashlib.sha1(key.encode()).hexdigest()
     return combined
 
 

@@ -44,7 +44,7 @@ def read_imessage(path):
         # print('CHAT ID', chat_id)
         conversation = chat_pb2.Conversation()
         conversation.group_name = 'iMessage Chat ID ' + str(chat_id[0])
-        conversation.id = chat_id[0]
+        conversation.id = str(chat_id[0])
         messages = c2.execute(
             "SELECT text, handleT.id, messageT.date/1000000000 + strftime(\"%s\", \"2001-01-01\") as date_unix, is_from_me FROM message messageT INNER JOIN chat_message_join chatMessageT ON (chatMessageT.chat_id="
             + str(chat_id[0]) +

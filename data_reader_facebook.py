@@ -33,14 +33,12 @@ def get_content_type(message_obj):
 
 def read_fb_conversation(path):
     """
-	Read a single Facebook message_1.json file. Returns a Conversation proto.
+	Read a single Facebook message_*.json file. Returns a Conversation proto.
 	"""
     conversation = chat_pb2.Conversation()
     with open(path) as f:
         data = json.load(f)
         conversation.group_name = data['title'].encode('latin1').decode('utf8')
-        # for participant_obj in data['participants']:
-        #     conversation.participant.extend([participant_obj['name']])
         participants = set([p['name'] for p in data['participants']])
         KNOWN_FIELDS = set(['sender_name', 'timestamp_ms', 'content', 'type'])
         for message_obj in data['messages']:
@@ -88,7 +86,7 @@ def read_fb_conversation(path):
 def assign_conversation_ids(inbox):
     i = 1
     for c in inbox.conversation:
-        c.id = i
+        c.id = str(i)
         i += 1
 
 
@@ -103,10 +101,19 @@ def read_facebook(fb_path):
     for folder in folders:
         full_path = fb_path + '/' + folder
         print('Reading ' + full_path)
-        conversation_paths = glob.glob(full_path + '/*/message*.json')
+        conversation_paths = glob.glob(full_path + '/*/')
         for path in conversation_paths:
-            conversation = read_fb_conversation(path)
-            inbox.conversation.extend([conversation])
+            # One json holds up to 10K messages
+            jsons = glob.glob(path + '/message_*.json')
+            conversation = chat_pb2.Conversation()
+            participants = set()
+            for json in jsons:
+                this_conversation = read_fb_conversation(json)
+                conversation.group_name = this_conversation.group_name
+                participants |= set(this_conversation.participant)
+                conversation.message.extend(this_conversation.message)
+            conversation.participant.extend(list(participants))
+            inbox.conversation.append(conversation)
     assign_conversation_ids(inbox)
     return inbox
 
