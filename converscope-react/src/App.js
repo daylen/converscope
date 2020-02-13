@@ -128,7 +128,7 @@ class App extends React.Component {
       isLoaded: false,
       items: [],
       dates: [],
-      show_explainer: localStorage.getItem('show_explainer') === 'true'
+      show_explainer: !(localStorage.getItem('show_explainer') === 'false')
     };
   }
 
