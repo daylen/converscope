@@ -128,29 +128,35 @@ class App extends React.Component {
       isLoaded: false,
       items: [],
       dates: [],
+      show_explainer: localStorage.getItem('show_explainer') === 'true'
     };
   }
 
   setGroups = (val) => {
-    this.setState({
-      groups: val,
-      time_period: this.state.time_period,
-      error: null,
-      isLoaded: false,
-      items: [],
-      dates: [],
+    this.setState(prevState => {
+      let newState = Object.assign({}, prevState);
+      newState.groups = val;
+      newState.isLoaded = false;
+      return newState;
     }, () => {this.fetchData(true)});
   }
 
   setTimePeriod = (val) => {
-    this.setState({
-      groups: this.state.groups,
-      time_period: val,
-      error: null,
-      isLoaded: false,
-      items: [],
-      dates: [],
+    this.setState(prevState => {
+      let newState = Object.assign({}, prevState);
+      newState.time_period = val;
+      newState.isLoaded = false;
+      return newState;
     }, () => {this.fetchData(true)});
+  }
+
+  setShowExplainer = (val) => {
+    this.setState(prevState => {
+      localStorage.setItem('show_explainer', val);
+      let newState = Object.assign({}, prevState);
+      newState.show_explainer = val;
+      return newState;
+    })
   }
 
   fetchData = (forced) => {
@@ -188,18 +194,22 @@ class App extends React.Component {
 
   render = () => {
     return (
+      <Router>
       <div className="container">
-        <Router>
         <div className="row">
           <div className="col-12">
             <div class="jumbotron mt-3">
               <h1 class="display-4"><Link to="/">converscope</Link></h1>
               <p class="lead">a <a href="https://daylen.com/">daylen yang</a> data experiment</p>
-              <hr class="my-4" />
+              {/*<p className="text-muted"><small>Inspired by <a href="http://hipsterdatascience.com/messages/" target="_blank">@cba's version</a></small></p>*/}
+              <div className={this.state.show_explainer ? "" : "d-none"}>
+              <hr />
               <p><b>What is this?</b> This is a visualization of every Facebook chat and iMessage I've ever sent/received in the last 10 years. <b>Each row is one person</b> (or group, if you flip the DMs/Groups toggle). The <b>x-axis is time</b>, and the <b>y-axis is the number of messages</b> sent that day. The rows are sorted by the all-time number of messages.</p>
               <p><b>Really, 10 years?</b> Mostly! The Facebook data starts at the end of 2010. The iMessages start mid-2014.</p>
               <p><b>Can I try my own chats?</b> Yes! The code is <a href="https://github.com/daylen/converscope">open source 🎉</a> so I encourage you to check it out.</p>
-              <p className="text-muted"><small>Inspired by <a href="http://hipsterdatascience.com/messages/" target="_blank">@cba's version</a></small></p>
+              </div>
+              <p className="text-muted"><a href="#" onClick={() => this.setShowExplainer(!this.state.show_explainer)}><small>{this.state.show_explainer ? "Hide" : "Show"} explainer text</small></a></p>
+
             </div>
           </div>
         </div>
@@ -211,8 +221,9 @@ class App extends React.Component {
             </Switch>
           </div>
         </div>
-        </Router>
       </div>
+      </Router>
+
     );
   }
 }

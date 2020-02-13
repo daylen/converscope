@@ -1,6 +1,7 @@
 
 .jumbotron {
 	background-color: #e3f8fc;
+	padding: 32px;
 }
 .participants {
 	padding: 0;
@@ -60,6 +61,9 @@ a:hover {
 	}
 	a {
 		color: #66b0ff;
+	}
+	a:hover {
+		color: #3396ff;
 	}
 	a .card {
 		color: white;
