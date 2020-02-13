@@ -34,7 +34,7 @@ function ConversationPill(props) {
               pointHoverRadius: 5,
               pointHoverBackgroundColor: 'rgba(75,192,192,1)',
               pointHoverBorderWidth: 2,
-              pointRadius: 1,
+              pointRadius: .3,
               pointHitRadius: 10,
               data: props.count_by_day,
             }]
