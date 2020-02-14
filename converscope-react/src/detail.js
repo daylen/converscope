@@ -80,7 +80,7 @@ class DetailPage extends React.Component {
         <div>
           {this.state.isLoaded ? 
             <div>
-            <div className="text-danger">{this.props.c_id}</div>
+            <div className="text-danger clip">{this.props.c_id}</div>
             <h4>{this.state.groupName}</h4>
             <div className="text-muted small">
               <ul className="participants">{this.state.participants.length > 0 ? this.state.participants.map((name) => <li key={this.state.c_id + name}>{name}</li>) : ""}</ul>

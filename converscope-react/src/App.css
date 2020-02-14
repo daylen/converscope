@@ -1,7 +1,8 @@
 
 .jumbotron {
 	background-color: #e3f8fc;
-	padding: 32px;
+	padding-top: 32px;
+	padding-bottom: 32px;
 }
 .participants {
 	padding: 0;
@@ -47,6 +48,11 @@ a:hover {
 .big-number {
 	font-weight: 300;
 	font-size: 3rem;
+}
+.clip {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 @media (prefers-color-scheme: dark) {
 	body {
