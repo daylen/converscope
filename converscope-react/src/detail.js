@@ -38,11 +38,12 @@ class DetailPage extends React.Component {
       isLoaded: false,
       groupName: '',
       metrics: {},
+      random_message: {},
       participants: [],
     };
   }
 
-  foo = (forced) => {
+  loadData = (forced) => {
     let url = constants.URL_PREFIX + "/api/conversation?id=" + this.props.c_id;
     console.log(url);
     fetch(url)
@@ -53,6 +54,7 @@ class DetailPage extends React.Component {
             isLoaded: true,
             groupName: result.groupName,
             metrics: result.metrics,
+            random_message: 'randomMessage' in result ? result.randomMessage : {},
             participants: result.participant,
           });
         },
@@ -69,7 +71,7 @@ class DetailPage extends React.Component {
   }
 
   componentDidMount() {
-    this.foo(true);
+    this.loadData(true);
   }
 
   render() {
@@ -80,14 +82,21 @@ class DetailPage extends React.Component {
         <div>
           {this.state.isLoaded ? 
             <div>
-            <div className="text-danger clip">{this.props.c_id}</div>
-            <h4>{this.state.groupName}</h4>
-            <div className="text-muted small">
-              <ul className="participants">{this.state.participants.length > 0 ? this.state.participants.map((name) => <li key={this.state.c_id + name}>{name}</li>) : ""}</ul>
+              <div className="text-danger clip">{this.props.c_id}</div>
+              <h4>{this.state.groupName}</h4>
+              <div className="text-muted small">
+                <ul className="participants">{this.state.participants.length > 0 ? this.state.participants.map((name) => <li key={this.state.c_id + name}>{name}</li>) : ""}</ul>
+              </div>
+              <div>
+              {'content' in this.state.random_message ? 
+              <div><hr /><h5 className="small-caps">blast from the past</h5>
+              <blockquote class="blockquote text-center">
+                <p class="mb-0">{this.state.random_message.content}</p>
+                <footer class="blockquote-footer">{this.state.random_message.sender_name + ' on ' + (new Date(this.state.random_message.timestamp * 1000)).toLocaleDateString()}</footer>
+              </blockquote></div> : ''}
+              {Object.entries(this.state.metrics).map(([key, value]) => <MetricRow metric_name={key} values={value} />)}
+              </div>
             </div>
-            <div>
-            {Object.entries(this.state.metrics).map(([key, value]) => <MetricRow metric_name={key} values={value} />)}
-            </div></div>
           : <div className="text-center">
               <div className="spinner-border" role="status">
                 <span className="sr-only">Loading...</span>

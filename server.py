@@ -12,6 +12,7 @@ import os
 import time
 from enum import Enum
 from collections import defaultdict, Counter
+import random
 
 # Force Pacific Time Zone
 os.environ['TZ'] = TIME_ZONE
@@ -127,6 +128,23 @@ def conversations():
     })
 
 
+def get_random_message(c):
+    # random message
+    content, sender_name, timestamp = '', '', -1
+    MAX_TRIES = 50
+    MIN_LEN = 30
+    for _ in range(MAX_TRIES):
+        rand_idx = random.randint(0, len(c.message))
+        rand_msg = c.message[rand_idx]
+        if rand_msg.content_type == chat_pb2.Message.CT_TEXT and len(
+                rand_msg.content) > MIN_LEN:
+            content = rand_msg.content
+            sender_name = rand_msg.sender_name
+            timestamp = rand_msg.timestamp
+            break
+    return content, sender_name, timestamp
+
+
 @app.route('/api/conversation')
 def conversation_details():
     c_id = request.args.get('id')
@@ -172,4 +190,11 @@ def conversation_details():
         'most_used_emoji': maybe_strip_names(pop_emoji_by_name),
         'longest_streak': longest_streak
     }
+    if not STRIP_PII:
+        content, sender_name, timestamp = get_random_message(c)
+        cdict['randomMessage'] = {
+            'content': content,
+            'sender_name': sender_name,
+            'timestamp': timestamp
+        }
     return flask.jsonify(cdict)
