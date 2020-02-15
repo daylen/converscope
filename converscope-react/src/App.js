@@ -138,7 +138,7 @@ class App extends React.Component {
       newState.groups = val;
       newState.isLoaded = false;
       return newState;
-    }, () => {this.fetchData(true)});
+    }, () => {this.fetchData()});
   }
 
   setTimePeriod = (val) => {
@@ -147,7 +147,7 @@ class App extends React.Component {
       newState.time_period = val;
       newState.isLoaded = false;
       return newState;
-    }, () => {this.fetchData(true)});
+    }, () => {this.fetchData()});
   }
 
   setShowExplainer = (val) => {
@@ -160,7 +160,6 @@ class App extends React.Component {
   }
 
   fetchData = (forced) => {
-    if (!forced && this.isLoaded) return;
     let url = constants.URL_PREFIX + "/api/conversations?groups=" + this.state.groups + '&time_period=' + this.state.time_period;
     fetch(url)
       .then(res => res.json())
@@ -189,7 +188,7 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    this.fetchData(true);
+    this.fetchData();
   }
 
   render = () => {
