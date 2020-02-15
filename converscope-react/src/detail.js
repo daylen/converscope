@@ -32,7 +32,6 @@ class DetailPage extends React.Component {
   }
 
   fetchData = () => {
-    if (this.state.isLoaded) return;
     let url = constants.URL_PREFIX + "/api/conversation?id=" + this.props.c_id;
     console.log(url);
     fetch(url)
@@ -59,14 +58,6 @@ class DetailPage extends React.Component {
       )
   }
 
-  triggerReload = () => {
-    this.setState(prevState => {
-      let newState = Object.assign({}, prevState);
-      newState.isLoaded = false;
-      return newState;
-    }, () => {this.fetchData()});
-  }
-
   componentDidMount() {
     this.fetchData();
   }
@@ -91,7 +82,7 @@ class DetailPage extends React.Component {
                 <p class="mb-0">{this.state.random_message.content}</p>
                 <footer class="blockquote-footer">{this.state.random_message.sender_name + ' on ' + (new Date(this.state.random_message.timestamp * 1000)).toLocaleDateString()}</footer>
               </blockquote>
-              <div class="text-center"><Button variant="warning" onClick={() => this.triggerReload()}>another one</Button></div>
+              <div class="text-center"><Button variant="warning" onClick={() => this.fetchData()}>another one</Button></div>
               </div> : ''}
               {Object.entries(this.state.metrics).map(([key, value]) => <MetricRow metric_name={key} values={value} />)}
               </div>
