@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Switch, Route, Link} from 'react-router-dom';
 import * as constants from './constants.js';
 import Button from 'react-bootstrap/Button';
+import MessageCountHistogram from './histogram.js';
 
 function metric_pretty_name(metric_short_name) {
   return metric_short_name.replace(/_/g, ' ');
@@ -26,6 +27,8 @@ class DetailPage extends React.Component {
       isLoaded: false,
       groupName: '',
       metrics: {},
+      x_axis: [],
+      counts: [],
       random_message: {},
       participants: [],
     };
@@ -42,6 +45,8 @@ class DetailPage extends React.Component {
             isLoaded: true,
             groupName: result.groupName,
             metrics: result.metrics,
+            x_axis: result.dates,
+            counts: result.count_by_day,
             random_message: 'randomMessage' in result ? result.randomMessage : {},
             participants: result.participant,
           });
@@ -75,6 +80,9 @@ class DetailPage extends React.Component {
               <div className="text-muted small">
                 <ul className="participants">{this.state.participants.length > 0 ? this.state.participants.map((name) => <li key={this.state.c_id + name}>{name}</li>) : ""}</ul>
               </div>
+              <hr />
+              <h5 className="small-caps">messages by day</h5>
+              <MessageCountHistogram x_axis={this.state.x_axis} counts={this.state.counts} />
               <div>
               {'content' in this.state.random_message ? 
               <div><hr /><h5 className="small-caps">blast from the past</h5>

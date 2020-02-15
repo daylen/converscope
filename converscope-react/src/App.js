@@ -10,6 +10,7 @@ import DropdownButton from 'react-bootstrap/DropdownButton';
 import Dropdown from 'react-bootstrap/Dropdown';
 import * as constants from './constants.js';
 import DetailPage from './detail.js';
+import MessageCountHistogram from './histogram.js';
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 
 function ConversationPill(props) {
@@ -21,45 +22,7 @@ function ConversationPill(props) {
         <div className="text-muted small">
           <ul className="participants">{props.participants.length > 2 ? props.participants.map((name) => <li key={props.c_id + name}>{name}</li>) : ""}</ul>
         </div>
-        <div className="chart">
-          <Line data={{
-            labels: props.x_axis,
-            datasets: [{
-              label: 'num messages',
-              fill: false,
-              lineTension: 0.1,
-              borderColor: 'rgba(75,192,192,0.5)',
-              borderWidth: 2,
-              pointBorderColor: 'rgba(75,192,192,1)',
-              pointHoverRadius: 5,
-              pointHoverBackgroundColor: 'rgba(75,192,192,1)',
-              pointHoverBorderWidth: 2,
-              pointRadius: .3,
-              pointHitRadius: 10,
-              data: props.count_by_day,
-            }]
-          }} height={"100%"} options={{
-            animation: {duration: 0},
-            hover: {animationDuration: 0},
-            responsiveAnimationDuration: 0,
-            elements: {line: {tension: 0}},
-            maintainAspectRatio: false,
-            legend: {
-              display: false,
-            },
-            scales: {
-              xAxes: [{
-                type: 'time',
-                time: {
-                  unit: 'year',
-                },
-                minRotation: 0,
-                maxRotation: 0,
-                sampleSize: 1,
-              }]
-            }
-          }} />
-        </div>
+        <MessageCountHistogram x_axis={props.x_axis} counts={props.count_by_week} />
 
       </div>
     </div>
@@ -105,7 +68,7 @@ class ConversationList extends React.Component {
           <CommandBar groups={this.props.groups} time_period={['Sort by: count ', <b>{this.props.time_period.replace('_', ' ')}</b>]} groups_callback={this.props.setGroups} time_period_callback={this.props.setTimePeriod}/>
           {this.props.isLoaded ? 
           this.props.items.map(item => (
-            <ConversationPill key={item.id} c_id={item.id} group_name={item.groupName} message_count={item.count} participants={item.participant} count_by_day={item.count_by_day} x_axis={item.dates} />
+            <ConversationPill key={item.id} c_id={item.id} group_name={item.groupName} message_count={item.count} participants={item.participant} count_by_week={item.count_by_week} x_axis={item.dates} />
           )) : <div className="text-center">
           <div className="spinner-border" role="status">
             <span className="sr-only">Loading...</span>

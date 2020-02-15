@@ -81,7 +81,7 @@ def zip_metrics_for_conversations(conversations, id_count_map, ia,
     zipped = zipped[:min(HOME_MAX_CONVERSATIONS, len(zipped))]
     for c in zipped:
         maybe_strip_pii(c)
-        c['count_by_day'], c['dates'] = ia.get_approx_histogram_week_bins(
+        c['count_by_week'], c['dates'] = ia.get_approx_histogram_week_bins(
             c['id'])
     return zipped
 
@@ -186,6 +186,8 @@ def conversation_details():
         'most_used_emoji': maybe_strip_names(pop_emoji_by_name),
         'longest_streak': longest_streak
     }
+    cdict['count_by_day'], cdict['dates'] = ia.get_accurate_histogram_day_bins(
+        c_id), ia.get_date_range()
     if not STRIP_PII:
         content, sender_name, timestamp = get_random_message(c)
         cdict['randomMessage'] = {
