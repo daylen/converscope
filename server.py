@@ -67,7 +67,6 @@ def zip_metrics_for_conversations(conversations, id_count_map, ia,
     """
 	Add the metric to the conversations json.
 	"""
-    num_days = 0
     zipped = []
     for c in conversations:
         if not filter_to_groups and len(c.participant) > 2:
@@ -82,9 +81,9 @@ def zip_metrics_for_conversations(conversations, id_count_map, ia,
     zipped = zipped[:min(HOME_MAX_CONVERSATIONS, len(zipped))]
     for c in zipped:
         maybe_strip_pii(c)
-        c['count_by_day'] = ia.get_count_timeline(c['id'])
-        num_days = len(c['count_by_day'])
-    return zipped, num_days
+        c['count_by_day'], c['dates'] = ia.get_approx_histogram_week_bins(
+            c['id'])
+    return zipped
 
 
 # Serve React App
@@ -120,12 +119,9 @@ def conversations():
     id_count_map = ia.get_message_counts(
         *get_time_range(request.args.get('time_period')))
     filter_to_groups = request.args.get('groups') == '1'
-    zipped, num_days = zip_metrics_for_conversations(c_metadatas, id_count_map,
-                                                     ia, filter_to_groups)
-    return flask.jsonify({
-        'conversations': zipped,
-        'dates': ia.get_date_range(),
-    })
+    zipped = zip_metrics_for_conversations(c_metadatas, id_count_map, ia,
+                                           filter_to_groups)
+    return flask.jsonify({'conversations': zipped})
 
 
 def get_random_message(c):

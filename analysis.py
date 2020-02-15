@@ -82,11 +82,25 @@ class InboxAnalyzer:
                    map(lambda x: x.timestamp,
                        c.message))), max(map(lambda x: x.timestamp, c.message))
 
-    def get_count_timeline(self, c_id):
+    def get_approx_histogram_week_bins(self, c_id):
         """
-		If start_ts is -1, uses the oldest ts in the inbox as the start_ts.
-		Bin granularity is by day.
-		End ts is today.
+        Histogram of message counts, binned by week and using an approximate algorithm.
+        """
+        c = self.id_conversation_map[c_id]
+        messages = sorted(map(lambda x: x.timestamp, c.message))
+        num_days = (datetime.date.fromtimestamp(self.newest_ts) -
+                    datetime.date.fromtimestamp(self.oldest_ts)).days
+        date_range = (self.oldest_ts, self.newest_ts)
+        hist, bin_edges = np.histogram(messages,
+                                       bins=num_days // 7,
+                                       range=date_range)
+        return hist.tolist(), self.get_date_range(week_mode=True,
+                                                  size=num_days // 7)
+
+    def get_accurate_histogram_day_bins(self, c_id):
+        """
+        Histogram of message counts, binned by day and using an accurate algorithm
+        that takes into account time zone and midnight boundaries.
 		"""
         c = self.id_conversation_map[c_id]
         hist = defaultdict(int)
@@ -96,17 +110,20 @@ class InboxAnalyzer:
         counts = [hist[x] if x in hist else 0 for x in self.get_date_range()]
         return counts
 
-    def get_date_range(self):
+    def get_date_range(self, week_mode=False, size=sys.maxsize):
         date_range = (datetime.date.fromtimestamp(self.oldest_ts),
                       datetime.date.fromtimestamp(self.newest_ts))
         dates = [date_range[0]]
-        while dates[-1] != date_range[1]:
-            dates.append(dates[-1] + datetime.timedelta(days=1))
+        while (not week_mode and
+               dates[-1] != date_range[1]) or (week_mode and len(dates) < size):
+            increment = 7 if week_mode else 1
+            dates.append(dates[-1] + datetime.timedelta(days=increment))
         dates = list(map(lambda x: x.isoformat(), dates))
         return dates
 
     def longest_streak_days(self, c_id):
-        hist = zip(self.get_count_timeline(c_id), self.get_date_range())
+        hist = zip(self.get_accurate_histogram_day_bins(c_id),
+                   self.get_date_range())
         best = 0
         best_end_date = ''
         curr = 0
@@ -155,8 +172,10 @@ def get_counts_by_sender(conv, count_granularity):
 
 def main():
     ia = InboxAnalyzer()
-    conv = ia.get_conversation('')
-    print_messages(conv, 1467529200, 1469170800)
+    print('total messages',
+          sum([len(x.message) for x in ia.inbox.conversation]))
+    # conv = ia.get_conversation('')
+    # print_messages(conv, 1467529200, 1469170800)
 
 
 def emoji_counts(conv):

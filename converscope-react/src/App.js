@@ -105,7 +105,7 @@ class ConversationList extends React.Component {
           <CommandBar groups={this.props.groups} time_period={['Sort by: count ', <b>{this.props.time_period.replace('_', ' ')}</b>]} groups_callback={this.props.setGroups} time_period_callback={this.props.setTimePeriod}/>
           {this.props.isLoaded ? 
           this.props.items.map(item => (
-            <ConversationPill key={item.id} c_id={item.id} group_name={item.groupName} message_count={item.count} participants={item.participant} count_by_day={item.count_by_day} x_axis={this.props.dates} />
+            <ConversationPill key={item.id} c_id={item.id} group_name={item.groupName} message_count={item.count} participants={item.participant} count_by_day={item.count_by_day} x_axis={item.dates} />
           )) : <div className="text-center">
           <div className="spinner-border" role="status">
             <span className="sr-only">Loading...</span>
@@ -127,7 +127,6 @@ class App extends React.Component {
       error: null,
       isLoaded: false,
       items: [],
-      dates: [],
       show_explainer: !(localStorage.getItem('show_explainer') === 'false')
     };
   }
@@ -170,7 +169,6 @@ class App extends React.Component {
             time_period: this.state.time_period,
             isLoaded: true,
             items: result.conversations,
-            dates: result.dates,
           });
         },
         // Note: it's important to handle errors here
@@ -203,7 +201,7 @@ class App extends React.Component {
               {/*<p className="text-muted"><small>Inspired by <a href="http://hipsterdatascience.com/messages/" target="_blank">@cba's version</a></small></p>*/}
               <div className={this.state.show_explainer ? "" : "d-none"}>
               <hr />
-              <p><b>What is this?</b> This is a visualization of every Facebook chat and iMessage I've ever sent/received in the last 10 years. <b>Each row is one person</b> (or group, if you flip the DMs/Groups toggle). The <b>x-axis is time</b>, and the <b>y-axis is the number of messages</b> sent that day. The rows are sorted by the all-time number of messages.</p>
+              <p><b>What is this?</b> This is a visualization of every Facebook chat and iMessage I've ever sent/received in the last 10 years. <b>Each row is one person</b> (or group, if you flip the DMs/Groups toggle). The <b>x-axis is time</b>, and the <b>y-axis is the number of messages</b> sent that week. The rows are sorted by the all-time number of messages.</p>
               <p><b>Really, 10 years?</b> Mostly! The Facebook data starts at the end of 2010. The iMessages start mid-2014.</p>
               <p><b>Can I try my own chats?</b> Yes! The code is <a href="https://github.com/daylen/converscope">open source 🎉</a> so I encourage you to check it out.</p>
               </div>
@@ -215,7 +213,7 @@ class App extends React.Component {
         <div className="row">
           <div className="col-12">
             <Switch>
-              <Route exact path="/" render={() => (<ConversationList groups={this.state.groups} time_period={this.state.time_period} error={this.state.error} isLoaded={this.state.isLoaded} items={this.state.items} dates={this.state.dates} setGroups={this.setGroups} setTimePeriod={this.setTimePeriod} />)} />
+              <Route exact path="/" render={() => (<ConversationList groups={this.state.groups} time_period={this.state.time_period} error={this.state.error} isLoaded={this.state.isLoaded} items={this.state.items} setGroups={this.setGroups} setTimePeriod={this.setTimePeriod} />)} />
               <Route path="/detail/:id" render={({match}) => (<DetailPage c_id={match.params.id} />)}/>
             </Switch>
           </div>
