@@ -130,7 +130,7 @@ def get_random_message(c):
     MAX_TRIES = 50
     MIN_LEN = 30
     for _ in range(MAX_TRIES):
-        rand_idx = random.randint(0, len(c.message))
+        rand_idx = random.randint(0, len(c.message) - 1)
         rand_msg = c.message[rand_idx]
         if rand_msg.content_type == chat_pb2.Message.CT_TEXT and len(
                 rand_msg.content) > MIN_LEN:
@@ -187,7 +187,7 @@ def conversation_details():
         'longest_streak': longest_streak
     }
     cdict['count_by_day'], cdict['dates'] = ia.get_accurate_histogram_day_bins(
-        c_id), ia.get_date_range()
+        c_id)
     if not STRIP_PII:
         content, sender_name, timestamp = get_random_message(c)
         cdict['randomMessage'] = {

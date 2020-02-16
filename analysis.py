@@ -94,8 +94,10 @@ class InboxAnalyzer:
         hist, bin_edges = np.histogram(messages,
                                        bins=num_days // 7,
                                        range=date_range)
-        return hist.tolist(), self.get_date_range(week_mode=True,
-                                                  size=num_days // 7)
+        return hist.tolist(), self.__get_date_range(self.oldest_ts,
+                                                    self.newest_ts,
+                                                    week_mode=True,
+                                                    size=num_days // 7)
 
     def get_accurate_histogram_day_bins(self, c_id):
         """
@@ -104,15 +106,23 @@ class InboxAnalyzer:
 		"""
         c = self.id_conversation_map[c_id]
         hist = defaultdict(int)
-        for m in c.message:
+        messages = sorted(c.message, key=lambda x: x.timestamp)
+        for m in messages:
             date_str = datetime.date.fromtimestamp(m.timestamp).isoformat()
             hist[date_str] += 1
-        counts = [hist[x] if x in hist else 0 for x in self.get_date_range()]
-        return counts
+        extremes = self.__get_extreme_ts(c_id)
+        date_range = self.__get_date_range(start_ts=extremes[0],
+                                           end_ts=extremes[1])
+        counts = [hist[x] if x in hist else 0 for x in date_range]
+        return counts, date_range
 
-    def get_date_range(self, week_mode=False, size=sys.maxsize):
-        date_range = (datetime.date.fromtimestamp(self.oldest_ts),
-                      datetime.date.fromtimestamp(self.newest_ts))
+    def __get_date_range(self,
+                         start_ts,
+                         end_ts,
+                         week_mode=False,
+                         size=sys.maxsize):
+        date_range = (datetime.date.fromtimestamp(start_ts),
+                      datetime.date.fromtimestamp(end_ts))
         dates = [date_range[0]]
         while (not week_mode and
                dates[-1] != date_range[1]) or (week_mode and len(dates) < size):
@@ -122,8 +132,7 @@ class InboxAnalyzer:
         return dates
 
     def longest_streak_days(self, c_id):
-        hist = zip(self.get_accurate_histogram_day_bins(c_id),
-                   self.get_date_range())
+        hist = zip(*self.get_accurate_histogram_day_bins(c_id))
         best = 0
         best_end_date = ''
         curr = 0

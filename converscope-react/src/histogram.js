@@ -32,7 +32,7 @@ function MessageCountHistogram(props) {
               xAxes: [{
                 type: 'time',
                 time: {
-                  unit: 'year',
+                  unit: (props.by_week || props.x_axis.length > 365) ? 'year' : 'month',
                 },
                 minRotation: 0,
                 maxRotation: 0,

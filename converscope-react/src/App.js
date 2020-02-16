@@ -22,7 +22,7 @@ function ConversationPill(props) {
         <div className="text-muted small">
           <ul className="participants">{props.participants.length > 2 ? props.participants.map((name) => <li key={props.c_id + name}>{name}</li>) : ""}</ul>
         </div>
-        <MessageCountHistogram x_axis={props.x_axis} counts={props.count_by_week} />
+        <MessageCountHistogram x_axis={props.x_axis} counts={props.count_by_week} by_week={true} />
 
       </div>
     </div>
