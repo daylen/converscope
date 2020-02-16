@@ -37,8 +37,12 @@ function MessageCountHistogram(props) {
                 minRotation: 0,
                 maxRotation: 0,
                 sampleSize: 1,
+              }],
+              yAxes: [{
+                ticks: {display: !props.by_week }
               }]
-            }
+            },
+            tooltips: { enabled: !props.by_week }
           }} />
         </div>);
 }
