@@ -1,6 +1,5 @@
 from constants import *
 import chat_pb2
-from metric_pb2 import *
 from collections import Counter, defaultdict
 import sys
 import numpy as np
