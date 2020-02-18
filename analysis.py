@@ -38,13 +38,17 @@ class InboxAnalyzer:
         self.__fit_tfidf()
 
     def __fit_tfidf(self):
-        documents = []
-        for c in self.id_conversation_map.values():
-            chat = ''
-            for m in c.message:
-                chat += m.content + '\n'
-            documents.append(chat)
-        self.tfidf.fit(documents)
+
+        def doc_generator():
+            for c in self.id_conversation_map.values():
+                chat = ''
+                for m in c.message:
+                    chat += m.content + '\n'
+                yield chat
+
+        print('running fit')
+        self.tfidf.fit(doc_generator())
+        print('done')
 
     def get_conversations(self):
         """
