@@ -195,6 +195,7 @@ def conversation_details():
             'sender_name': sender_name,
             'timestamp': timestamp
         }
-        tokens, scores = ia.get_top_tfidf_tokens(c_id)
-        cdict['tfidf'] = {'tokens': tokens, 'scores': scores}
+        if USE_TFIDF:
+            tokens, scores = ia.get_top_tfidf_tokens(c_id)
+            cdict['tfidf'] = {'tokens': tokens, 'scores': scores}
     return flask.jsonify(cdict)

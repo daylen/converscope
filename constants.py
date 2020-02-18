@@ -26,6 +26,9 @@ COLLEGE_GRAD_TS = 1496300400 # ~2017
 # Optional settings #
 #####################
 
+# Disable if page loads are too slow (i.e. you have a lot of messages)
+USE_TFIDF = True
+
 # Redacts names in the web app and hides the "blast from the past" feature
 STRIP_PII = False
 

@@ -34,8 +34,9 @@ class InboxAnalyzer:
             self.newest_ts = max(self.newest_ts, new)
         print('InboxAnalyzer initialized,', len(self.id_conversation_map),
               'conversations')
-        self.tfidf = TfidfVectorizer(max_df=0.2, stop_words=TFIDF_BLACKLIST)
-        self.__fit_tfidf()
+        self.tfidf = TfidfVectorizer(max_df=0.2, max_features=50000, stop_words=TFIDF_BLACKLIST)
+        if USE_TFIDF:
+            self.__fit_tfidf()
 
     def __fit_tfidf(self):
 
