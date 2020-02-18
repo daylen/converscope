@@ -11,11 +11,12 @@ You can get the same charts for your own data! Here's how:
 1. Facebook: Download your Facebook messages at https://www.facebook.com/dyi/. Select the JSON format and deselect everything except Messages.
 2. iMessage: (This step requires having a Mac) Your iMessage data is located in `~/Library/Messages/chat.db`. Copy that to the `./data/` folder. For optimal results, make sure "Messages in iCloud" is enabled so old messages from your iPhone sync over. You also need a CSV of your contacts. If you use the Contacts app, you can copy and paste your contacts into Numbers and save that as a CSV.
 3. Install dependencies: `pip3 install -r requirements.txt`
+4. Make a folder called `data/` in this repo.
 4. Modify paths in `constants.py` and then run `python3 data_merge.py` to get a single `inbox.pb` file. Conversations are automatically merged between your Facebook and iMessage data.
 
 ### Running the server
 1. Configure your `STRIP_PII` preference in `constants.py`
-2. Build the React front-end: `cd converscope-react && npm install && npm run build`.
+2. Build the React front-end: `cd converscope-react` then `npm install && npm run build`. You will need Node.js for this step.
 3. Run the metrics server: `export FLASK_APP=server.py && flask run`  Then visit http://localhost:5000
 
 ## License

@@ -7,11 +7,13 @@ import hashlib
 
 
 def combine_inboxes(inbox_arr):
+    assert len(inbox_arr) >= 1
+    print('Combining inboxes')
     combined = chat_pb2.Inbox()
     parts_to_convs = {}
     for inbox in inbox_arr:
         if len(inbox.conversation) == 0:
-            raise Exception("No conversations to merge")
+            raise Exception("No conversations to merge. Check if paths in constants.py are correct.")
         for conv in inbox.conversation:
             # Use participants to merge between iMessage and Facebook
             key = '+'.join(sorted(conv.participant))
@@ -22,7 +24,7 @@ def combine_inboxes(inbox_arr):
                 parts_to_convs[key] = conv
     for conv in parts_to_convs.values():
         combined.conversation.add().CopyFrom(conv)
-    print(parts_to_convs.keys())
+    # print(parts_to_convs.keys())
     # Assign IDs
     for conv in combined.conversation:
         key = '+'.join(sorted(conv.participant))
@@ -39,11 +41,14 @@ def validate(inbox):
 
 
 def main():
-    inbox_fb = read_facebook(FB_IMPORT_PATH)
-    validate(inbox_fb)
-    inbox_imessage = read_imessage(IMESSAGE_IMPORT_PATH)
-    validate(inbox_imessage)
-    inbox = combine_inboxes([inbox_fb, inbox_imessage])
+    inboxes = []
+    if USE_FACEBOOK:
+        print('Reading Facebook data')
+        inboxes.append(read_facebook(FB_IMPORT_PATH))
+    if USE_IMESSAGE:
+        print('Reading iMessage data')
+        inboxes.append(read_imessage(IMESSAGE_IMPORT_PATH))
+    inbox = combine_inboxes(inboxes)
     validate(inbox)
 
     # print(inbox)

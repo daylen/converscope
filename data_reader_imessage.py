@@ -31,7 +31,7 @@ def get_id_name_map(df):
 def read_imessage(path):
     # Load contacts
     id_name_map = get_id_name_map(pd.read_csv(CONTACTS_PATH))
-    print(id_name_map)
+    # print(id_name_map)
 
     # useful resource: https://github.com/dsouzarc/iMessageAnalyzer/blob/master/Random%20SQLite%20Commands.txt
     conn = sqlite3.connect(path)
@@ -62,7 +62,8 @@ def read_imessage(path):
             elif msg[1] in id_name_map:
                 sender_name = id_name_map[msg[1]]
             else:
-                print('Unknown sender', sender_name)
+                pass
+                #print('Unknown sender', sender_name)
             message_proto.sender_name = sender_name
             message_proto.timestamp = msg[2]
             message_proto.content_type = chat_pb2.Message.CT_TEXT
