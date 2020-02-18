@@ -7,6 +7,11 @@ import datetime
 import time
 from enum import Enum
 from emoji import UNICODE_EMOJI
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+TFIDF_BLACKLIST = [
+    'kimtranscriptpluginbreadcrumbtextreceiveridentifier', 'http'
+]
 
 
 class InboxAnalyzer:
@@ -29,6 +34,17 @@ class InboxAnalyzer:
             self.newest_ts = max(self.newest_ts, new)
         print('InboxAnalyzer initialized,', len(self.id_conversation_map),
               'conversations')
+        self.tfidf = TfidfVectorizer(max_df=0.2, stop_words=TFIDF_BLACKLIST)
+        self.__fit_tfidf()
+
+    def __fit_tfidf(self):
+        documents = []
+        for c in self.id_conversation_map.values():
+            chat = ''
+            for m in c.message:
+                chat += m.content + '\n'
+            documents.append(chat)
+        self.tfidf.fit(documents)
 
     def get_conversations(self):
         """
@@ -152,6 +168,20 @@ class InboxAnalyzer:
             names.update(c.participant)
         return names
 
+    def get_top_tfidf_tokens(self, c_id, n=20):
+        conv = self.get_conversation(c_id)
+        # Make the document
+        chat = ''
+        for m in conv.message:
+            chat += m.content + '\n'
+        response = self.tfidf.transform([chat])
+
+        feature_array = np.array(self.tfidf.get_feature_names())
+        tfidf_sorting = np.argsort(response.toarray()).flatten()[::-1]
+        top_tokens = feature_array[tfidf_sorting]
+        scores = response.toarray().flatten()[tfidf_sorting]
+        return top_tokens[:n].tolist(), scores[:n].tolist()
+
 
 def print_messages(conv, start_ts=0, end_ts=sys.maxsize):
     i = 0
@@ -183,8 +213,9 @@ def main():
     ia = InboxAnalyzer()
     print('total messages',
           sum([len(x.message) for x in ia.inbox.conversation]))
+    print(ia.get_top_tfidf_tokens(''))
     # conv = ia.get_conversation('')
-    print(list(map(lambda x: (ia.get_conversation(x).group_name, ia.get_conversation(x).id), ia.search_conversations_by_name('Roader trip'))))
+    # print(list(map(lambda x: (ia.get_conversation(x).group_name, ia.get_conversation(x).id), ia.search_conversations_by_name('Roader trip'))))
 
 
 def emoji_counts(conv):

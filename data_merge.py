@@ -13,7 +13,9 @@ def combine_inboxes(inbox_arr):
     parts_to_convs = {}
     for inbox in inbox_arr:
         if len(inbox.conversation) == 0:
-            raise Exception("No conversations to merge. Check if paths in constants.py are correct.")
+            raise Exception(
+                "No conversations to merge. Check if paths in constants.py are correct."
+            )
         for conv in inbox.conversation:
             # Use participants to merge between iMessage and Facebook
             key = '+'.join(sorted(conv.participant))

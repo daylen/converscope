@@ -54,6 +54,11 @@ a:hover {
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
+.tfidf-token {
+	display: inline-block;
+	margin-right: 20px;
+	font-weight: 300;
+}
 @media (prefers-color-scheme: dark) {
 	body {
 		background: #111;

@@ -33,6 +33,7 @@ class DetailPage extends React.Component {
       x_axis: [],
       counts: [],
       random_message: {},
+      tfidf: {},
       participants: [],
     };
   }
@@ -51,6 +52,7 @@ class DetailPage extends React.Component {
             x_axis: result.dates,
             counts: result.count_by_day,
             random_message: 'randomMessage' in result ? result.randomMessage : {},
+            tfidf: 'tfidf' in result ? result.tfidf : {},
             participants: result.participant,
           });
         },
@@ -94,6 +96,12 @@ class DetailPage extends React.Component {
                 <footer class="blockquote-footer">{this.state.random_message.sender_name + ' on ' + (new Date(this.state.random_message.timestamp * 1000)).toLocaleDateString()}</footer>
               </blockquote>
               <div class="text-center"><Button variant="warning" onClick={() => this.fetchData()}>another one</Button></div>
+              </div> : ''}
+              {'tokens' in this.state.tfidf ?
+              <div><hr /><h5 className="small-caps">tf-idf top tokens</h5>
+              <div>
+                {this.state.tfidf.tokens.map((token, index) => <div className="tfidf-token" style={{fontSize: this.state.tfidf.scores[index]*200 + 'pt'}}>{token}</div>)}
+              </div>
               </div> : ''}
               {Object.entries(this.state.metrics).map(([key, value]) => <MetricRow metric_name={key} values={value} />)}
               </div>
