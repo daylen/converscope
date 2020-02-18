@@ -59,11 +59,12 @@ class InboxAnalyzer:
     def get_conversation(self, c_id):
         return self.id_conversation_map[c_id]
 
-    def get_conversation_by_group_name(self, group_name):
+    def search_conversations_by_name(self, name):
+        matches = []
         for c in self.inbox.conversation:
-            if c.group_name == group_name:
-                return c
-        return None
+            if name.lower() in c.group_name.lower():
+                matches.append(c.id)
+        return matches
 
     def get_oldest_ts(self):
         return self.oldest_ts
@@ -183,7 +184,7 @@ def main():
     print('total messages',
           sum([len(x.message) for x in ia.inbox.conversation]))
     # conv = ia.get_conversation('')
-    # print_messages(conv, 1467529200, 1469170800)
+    print(list(map(lambda x: (ia.get_conversation(x).group_name, ia.get_conversation(x).id), ia.search_conversations_by_name('Roader trip'))))
 
 
 def emoji_counts(conv):
