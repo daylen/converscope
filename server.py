@@ -169,10 +169,16 @@ def conversation_details():
     emoji_list_by_name = analysis.emoji_counts(c)
     pop_emoji_by_name = []
     for (name, emojis) in emoji_list_by_name.items():
-        the_emoji, num_times = Counter(emojis).most_common(1)[0]
+        three_top_emoji = Counter(emojis).most_common(3)
+        the_emoji, num_times = three_top_emoji[0] # guaranteed at least 1
+
+        emoji_str = ''
+        for emoji, num_times in three_top_emoji:
+            emoji_str += emoji
+
         pop_emoji_by_name.append([
-            name + ' used ' + str(num_times) + ' time' +
-            ('' if num_times == 1 else 's'), the_emoji
+            name + ' used ' + the_emoji + ' ' + str(num_times) + ' time' +
+            ('' if num_times == 1 else 's'), emoji_str
         ])
     # longest streak
     streak_length, end_date = ia.longest_streak_days(c_id)

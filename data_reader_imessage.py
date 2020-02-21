@@ -7,7 +7,10 @@ import pandas as pd
 import phonenumbers
 import google.protobuf.text_format as text_format
 import datetime
+from math import isnan
 
+def str_strip_nan(item):
+    return '' if (type(item) != str and isnan(item)) else str(item)
 
 def get_id_name_map(df):
     id_df = df[list(filter(lambda x: 'Phone' in x or 'Email' in x, df.columns))]
@@ -23,8 +26,8 @@ def get_id_name_map(df):
                     phone, phonenumbers.PhoneNumberFormat.E164)
             except:
                 pass
-            id_name_map[identifier] = str(
-                df.loc[idx]['First Name']) + ' ' + str(df.loc[idx]['Last Name'])
+            id_name_map[identifier] = str_strip_nan(
+                df.loc[idx]['First Name']) + ' ' + str_strip_nan(df.loc[idx]['Last Name'])
     return id_name_map
 
 
