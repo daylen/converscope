@@ -16,6 +16,10 @@ TFIDF_BLACKLIST = [
 
 class InboxAnalyzer:
 
+    # conversation id -> sorted list of top n tokens
+    tfidf_tokens_by_cid = {}
+    tfidf_scores_by_cid = {}
+
     def __init__(self):
         f = open(EXPORT_PATH + ('.pbtxt' if USE_PBTXT else '.pb'),
                  'r' if USE_PBTXT else 'rb')
@@ -174,6 +178,10 @@ class InboxAnalyzer:
         return names
 
     def get_top_tfidf_tokens(self, c_id, n=20):
+        # Check if we have already computed all the tokens we need
+        if c_id in self.tfidf_tokens_by_cid and len(self.tfidf_tokens_by_cid[c_id]) >= n:
+            return self.tfidf_tokens_by_cid[c_id][:n], self.tfidf_scores_by_cid[c_id][:n]
+
         conv = self.get_conversation(c_id)
         # Make the document
         chat = ''
@@ -185,7 +193,12 @@ class InboxAnalyzer:
         tfidf_sorting = np.argsort(response.toarray()).flatten()[::-1]
         top_tokens = feature_array[tfidf_sorting]
         scores = response.toarray().flatten()[tfidf_sorting]
-        return top_tokens[:n].tolist(), scores[:n].tolist()
+
+        # Memoize
+        self.tfidf_tokens_by_cid[c_id] = top_tokens[:n].tolist()
+        self.tfidf_scores_by_cid[c_id] = scores[:n].tolist()
+
+        return self.tfidf_tokens_by_cid[c_id], self.tfidf_scores_by_cid[c_id]
 
 
 def print_messages(conv, start_ts=0, end_ts=sys.maxsize):
@@ -218,8 +231,9 @@ def main():
     ia = InboxAnalyzer()
     print('total messages',
           sum([len(x.message) for x in ia.inbox.conversation]))
-    print(ia.get_top_tfidf_tokens(''))
-    # conv = ia.get_conversation('')
+    # print(ia.get_top_tfidf_tokens(''))
+    conv = ia.get_conversation('e56a810ed31da5ad9056e8d64c3a1711b505d7b6')
+    print_messages(conv)
     # print(list(map(lambda x: (ia.get_conversation(x).group_name, ia.get_conversation(x).id), ia.search_conversations_by_name('Roader trip'))))
 
 
