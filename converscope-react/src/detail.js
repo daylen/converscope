@@ -8,6 +8,14 @@ function metric_pretty_name(metric_short_name) {
   return metric_short_name.replace(/_/g, ' ');
 }
 
+function force_emoji_rendering(str) {
+  var str2 = '';
+  for (const c of str) {
+    str2 += c + '&#xfe0f;';
+  }
+  return str2;
+}
+
 function MetricRow(props) {
   return (
     <div>
@@ -15,7 +23,7 @@ function MetricRow(props) {
     <h5 className="small-caps">{metric_pretty_name(props.metric_name)}</h5>
     <div class="row">{props.values.map((arr) =>
       <div className="statistic col-sm-4">
-      <div className="big-number" dangerouslySetInnerHTML={{__html: isNaN(arr[1]) ? arr[1] + '&#xfe0f;' : arr[1].toLocaleString()}} />
+      <div className="big-number" dangerouslySetInnerHTML={{__html: isNaN(arr[1]) ? force_emoji_rendering(arr[1]) : arr[1].toLocaleString()}} />
       <div className="small">{arr[0]}</div>
       </div>)}</div>
     </div>
