@@ -46,6 +46,7 @@ class CommandBar extends React.Component {
       &nbsp;
       <DropdownButton id="sort-by-button" title={this.props.time_period} variant="warning">
         <Dropdown.Item eventKey="all_time" onSelect={this.props.time_period_callback}>all time</Dropdown.Item>
+        <Dropdown.Item eventKey="last_6_months" onSelect={this.props.time_period_callback}>last 6 months</Dropdown.Item>
         <Dropdown.Item eventKey="last_year" onSelect={this.props.time_period_callback}>last year</Dropdown.Item>
         <Dropdown.Item eventKey="high_school" onSelect={this.props.time_period_callback}>high school</Dropdown.Item>
         <Dropdown.Item eventKey="college" onSelect={this.props.time_period_callback}>college</Dropdown.Item>
@@ -65,7 +66,7 @@ class ConversationList extends React.Component {
     } else {
       return (
         <div>
-          <CommandBar groups={this.props.groups} time_period={['Sort by: count ', <b>{this.props.time_period.replace('_', ' ')}</b>]} groups_callback={this.props.setGroups} time_period_callback={this.props.setTimePeriod}/>
+          <CommandBar groups={this.props.groups} time_period={['Sort by: count ', <b>{this.props.time_period.replace(/_/g, ' ')}</b>]} groups_callback={this.props.setGroups} time_period_callback={this.props.setTimePeriod}/>
           {this.props.isLoaded ? 
           this.props.items.map(item => (
             <ConversationPill key={item.id} c_id={item.id} group_name={item.groupName} message_count={item.count} participants={item.participant} count_by_week={item.count_by_week} x_axis={item.dates} />

@@ -107,10 +107,12 @@ TIME_RANGES = {
 def get_time_range(time_period):
     if time_period in TIME_RANGES:
         return TIME_RANGES[time_period]
+    elif time_period == 'last_6_months':
+        return (time.time() - 60 * 60 * 24 * 182, sys.maxsize)
     elif time_period == 'last_year':
         return (time.time() - 60 * 60 * 24 * 365, sys.maxsize)
     else:
-        return time_period[TimePeriod.ALL_TIME]
+        return TIME_RANGES['all_time']
 
 
 @app.route('/api/conversations')
