@@ -47,16 +47,14 @@ def maybe_strip_pii(c):
 def maybe_strip_names(arr_of_arr):
     if not STRIP_PII:
         return arr_of_arr
-    names = ia.all_names()
-    names.remove(SELF_NAME)
-    # print(names)
-    # stripped = []
+    blacklist = ia.all_names()
+    blacklist.remove(SELF_NAME)
+    blacklist.remove('')
     for i in range(len(arr_of_arr)):
-        # x2 = []
         for j in range(len(arr_of_arr[i])):
             if not isinstance(arr_of_arr[i][j], str):
                 continue
-            for name in names:
+            for name in blacklist:
                 if name in arr_of_arr[i][j]:
                     arr_of_arr[i][j] = arr_of_arr[i][j].replace(name, 'XXX')
     return arr_of_arr
