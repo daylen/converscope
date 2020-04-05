@@ -24,9 +24,9 @@ CORS(app)
 
 
 def strip_group_name(group_name):
-    names = ia.all_names()
-    names.remove(SELF_NAME)
-    for name in names:
+    blacklist = ia.all_names()
+    blacklist.remove(SELF_NAME)
+    for name in blacklist:
         if name in group_name:
             return 'XXX'
     return group_name
@@ -49,7 +49,6 @@ def maybe_strip_names(arr_of_arr):
         return arr_of_arr
     blacklist = ia.all_names()
     blacklist.remove(SELF_NAME)
-    blacklist.remove('')
     for i in range(len(arr_of_arr)):
         for j in range(len(arr_of_arr[i])):
             if not isinstance(arr_of_arr[i][j], str):

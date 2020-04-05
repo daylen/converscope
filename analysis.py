@@ -175,6 +175,7 @@ class InboxAnalyzer:
         names = set()
         for c in self.inbox.conversation:
             names.update(c.participant)
+        names.remove('')
         return names
 
     def get_top_tfidf_tokens(self, c_id, n=20):
