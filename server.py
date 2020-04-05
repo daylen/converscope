@@ -173,7 +173,7 @@ def conversation_details():
         the_emoji, num_times = three_top_emoji[0] # guaranteed at least 1
 
         emoji_str = ''
-        for emoji, num_times in three_top_emoji:
+        for emoji, _ in three_top_emoji:
             emoji_str += emoji
 
         pop_emoji_by_name.append([
