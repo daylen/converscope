@@ -16,7 +16,7 @@ You can get the same charts for your own data! Here's how:
 
 ### Running the server
 1. Configure your `STRIP_PII` preference in `constants.py`
-2. Build the React front-end: `cd converscope-react` then `npm install && npm run build`. You will need Node.js for this step.
+2. Build the React front-end: `cd converscope-react && npm install && npm run build && cd ..`. You will need Node.js for this step.
 3. Run the metrics server: `export FLASK_APP=server.py && flask run`  Then visit http://localhost:5000
 
 ## License
