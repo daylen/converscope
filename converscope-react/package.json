@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "apexcharts": "^3.10.1",
+    "apexcharts": "^3.24.0",
     "bootstrap": "^4.4.1",
     "chart.js": "^2.9.3",
     "react": "^16.8.6",
